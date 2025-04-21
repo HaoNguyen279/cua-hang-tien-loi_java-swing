@@ -1,0 +1,15 @@
+package Entity;
+
+import java.time.LocalDate;
+
+public class NhanVien {
+	private String maNhanVien;
+	private String tenNhanVien;
+	private LocalDate ngaySinh;
+	private LocalDate ngayVaoLam;
+	private String username;
+	private String password;
+	private String chucVu;
+	
+	
+}
