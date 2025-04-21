@@ -1,12 +1,10 @@
 /*
- * @ (#) AdminGUI.java   1.0     4/21/2025
+ * @ (#) NhanVien_Dao.java   1.0     4/21/2025
  * Copyright (c) 2025 IUH, All rights reserved.
  */
 
 
-package GUI;
-
-import javax.swing.*;
+package DAO;
 
 /*
  * @description:
@@ -14,8 +12,7 @@ import javax.swing.*;
  * @date:  4/21/2025
  * @version:    1.0
  */
-public class AdminGUI extends JFrame {
-
+public class NhanVien_Dao {
 
 
 }

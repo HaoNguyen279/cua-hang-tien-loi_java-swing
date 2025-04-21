@@ -1,11 +1,13 @@
 package GUI;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.*;
 
-public class LoginGUI extends JFrame{
+public class LoginGUI extends JFrame implements ActionListener {
 	private JLabel lblUsername, lblPassword, lblTitleLogin;
 	private JTextField txtUsername, txtPassword;
 	private JButton btnLogin, btnExit;
@@ -13,9 +15,13 @@ public class LoginGUI extends JFrame{
 	private ImageIcon bg2 = new ImageIcon("image/femboi.png");
 	static String url = "image/gradientBgLogin.png";
 	static File file = new File(url);
-
+	private JFrame loginFrame;
 	public LoginGUI() {
-		super();
+		createLoginWindow();
+	}
+
+	private void createLoginWindow() {
+		loginFrame = new JFrame();
 		Font fntLogin = new Font("Roboto", Font.BOLD, 30);
 		Font fntUserAndPassword = new Font("Roboto", Font.PLAIN,18);
 		lblUsername = new JLabel("Username");
@@ -68,36 +74,24 @@ public class LoginGUI extends JFrame{
 		test6.add(btnLogin);
 		test6.setBounds(0,340,400,60);
 
-
-
-
 		// Thêm các component vào rightPanel
 		pnlRight.add(test);
 		pnlRight.add(test2);
 		pnlRight.add(test4);
 		pnlRight.add(test6);
 
-
-
-
-
-
-
-
-
-
-
-
-		setLayout(new GridLayout(1,2));
-		add(pnlLeftPanel);
-		add(pnlRight);
-		setSize(800,600);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setVisible(true);
+		//
+		btnLogin.addActionListener(this);
+		loginFrame.setLayout(new GridLayout(1,2));
+		loginFrame.add(pnlLeftPanel);
+		loginFrame.add(pnlRight);
+		loginFrame.setSize(800,600);
+		loginFrame.setLocationRelativeTo(null);
+		loginFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		loginFrame.setVisible(true);
 	}
 
-	public static void main(String[] args) {
+		public static void main(String[] args) {
 		new LoginGUI();
 		System.out.println("Tim thay file" + file.getAbsoluteFile());
 	}
@@ -105,10 +99,6 @@ public class LoginGUI extends JFrame{
 		public LeftSubPanel(){
 			setLayout(null);
 
-			// Tạo ảnh background cho leftPanel
-//			Image imageBg = backgroundIcon.getImage();
-//			Image scaledBg = imageBg.getScaledInstance(400,600, Image.SCALE_SMOOTH);
-//			ImageIcon imageBg = new ImageIcon(scaledBg);
 			JLabel lblBackground = new JLabel();
 			lblBackground.setIcon(backgroundIcon);
 			lblBackground.setBounds(0,0,400,600);
@@ -135,6 +125,25 @@ public class LoginGUI extends JFrame{
 			// Thêm các component vào panel
 			add(pnlText); // Them text trước background??
 			add(lblBackground);
+
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object o = e.getSource();
+		if(o==btnLogin) {
+//			validateLogin();
+
+		}
+	}
+
+	private void validateLogin() {
+		String user = txtUsername.getText();
+		String pwd = txtPassword.getText();
+		//can co database
+		//test
+		if(user.equals("admin")&&pwd.equals("password")) {
 
 		}
 	}

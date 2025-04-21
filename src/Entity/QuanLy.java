@@ -7,4 +7,6 @@ public class QuanLy {
 	private String password;
 	private String chucVu;
 
+
+
 }
