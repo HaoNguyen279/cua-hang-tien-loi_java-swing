@@ -86,10 +86,7 @@ public class EmployeeGUI extends JFrame {
         gbc4.weighty = 1.0;
         gbc4.fill = GridBagConstraints.BOTH;
         container.add(table3, gbc4);
-
-    //kh co database làm cc gì hac v
-        push lên đi xí a lấy về làm database sau
-        ac va ac a c cacacacacacacaccaccacacacaccacc ac v
+        
 
         
 

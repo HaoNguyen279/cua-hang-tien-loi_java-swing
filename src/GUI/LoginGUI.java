@@ -4,6 +4,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -133,18 +139,48 @@ public class LoginGUI extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
 		if(o==btnLogin) {
-//			validateLogin();
-
+			try {
+				validateLogin();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 		}
 	}
 
-	private void validateLogin() {
+	private void validateLogin() throws SQLException {
 		String user = txtUsername.getText();
 		String pwd = txtPassword.getText();
-		//can co database
-		//test
-		if(user.equals("admin")&&pwd.equals("password")) {
-
+		Connection con = null;
+		String url  = "jdbc:sqlserver://localhost:1433;DatabaseName=mydb;encrypt=true;trustServerCertificate=true;";
+		String userdata = "sa1";
+		String password = "password";
+		con = DriverManager.getConnection(url,userdata,password);
+		Statement sta = con.createStatement();
+		String sql = "select * from hocSinh";
+		ResultSet rs = sta.executeQuery(sql);
+		int dem = 0;
+		ArrayList<Integer> id = new ArrayList<>();
+		ArrayList<String> ho = new ArrayList<>();
+		while(rs.next()) {
+			id.add(rs.getInt(1));
+			ho.add(rs.getString(2));
+			dem++;
 		}
+		for(int i=0;i<dem;i++) {
+			if(id.get(i).toString().equals(user)&&ho.get(i).equals(pwd)) {
+				System.out.println("chuan r");
+				loginFrame.dispose();
+				new EmployeeGUI();
+				break;
+			}
+			else {
+				System.out.println("sai r");
+			}
+		}
+		System.out.println(id.get(0));
+		System.out.println(ho.get(0));
+		
 	}
 }
