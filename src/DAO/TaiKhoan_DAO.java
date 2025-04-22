@@ -1,13 +1,9 @@
 package DAO;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.time.LocalDate;
+import java.sql.*;
 import java.util.ArrayList;
 
 import ConnectDB.ConnectDB;
-import Entity.SanPham;
 import Entity.TaiKhoan;
 
 public class TaiKhoan_DAO {
@@ -32,8 +28,8 @@ public class TaiKhoan_DAO {
                 String username = rs.getString(1);
                 String password = rs.getString(2);
                 String role = rs.getString(3);
-                TaiKhoan tk = new TaiKhoan(username, password, role);
-                dstk.add(tk);
+                TaiKhoan tk2 = new TaiKhoan(username, password, role);
+                dstk.add(tk2);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,6 +37,30 @@ public class TaiKhoan_DAO {
         return dstk;
 
     }
+
+    public TaiKhoan getTaiKhoan(String manv) {
+        try {
+            ConnectDB.getInstance();
+            Connection con = ConnectDB.getConnection();
+
+            String sql = "SELECT * FROM TaiKhoan where username = ?";
+            PreparedStatement statement = null;
+            statement = con.prepareStatement(sql);
+            statement.setString(1, manv);
+
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()) {
+
+                String pass = rs.getString(2);
+                String role = rs.getString(3);
+                tk = new TaiKhoan(manv,pass,role);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tk;
+    }
+
 	public static void main(String[] args) {
 		ConnectDB.getInstance().connect();
 		TaiKhoan_DAO dao = new TaiKhoan_DAO();

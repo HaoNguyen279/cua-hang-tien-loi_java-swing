@@ -8,17 +8,17 @@ package GUI;
 
 import ConnectDB.ConnectDB;
 import DAO.SanPham_DAO;
+import DAO.TaiKhoan_DAO;
 import Entity.SanPham;
+import Entity.TaiKhoan;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 /*
@@ -31,15 +31,15 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien;
     private JButton btnThemSanPham, btnXoaSanPham, btnTimSanPham,
-            btnTheThanhVien, btnKhuyenMai, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
+            btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
 
     private ArrayList<SanPham> listSanPham;
-    private int giamGia = 50;
+    private String username;
     public EmployeeGUI(String username, String name){
         super();
-        
+        this.username = username;
         
         
         JLabel userid = new JLabel("userid: " + username);
@@ -105,7 +105,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnXoaSanPham = new JButton("Xóa sản phẩm");
         btnTimSanPham = new JButton("Tìm sản phẩm");
         btnTheThanhVien = new JButton("Nhập mã thành viên");
-        btnKhuyenMai = new JButton("Nhập mã khuyến mãi");
+        btnTamDungBan = new JButton("Nhập mã khuyến mãi");
         btnKieuThanhToan  = new JButton("Kiểu thanh toán");
         btnXuatHoaDonTam = new JButton("Xuất hóa đơn");
         btnKetCa = new JButton("Kết ca");
@@ -113,7 +113,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         // ad icon
         btnTheThanhVien.setIcon(new ImageIcon(membership_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
-        btnKhuyenMai.setIcon(new ImageIcon(voucher_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnTamDungBan.setIcon(new ImageIcon(voucher_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKieuThanhToan.setIcon(new ImageIcon(payment_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnXuatHoaDonTam.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
 
@@ -123,7 +123,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnXoaSanPham.addActionListener(this);
         btnTimSanPham.addActionListener(this);
         btnTheThanhVien.addActionListener(this);
-        btnKhuyenMai.addActionListener(this);
+        btnTamDungBan.addActionListener(this);
         btnKieuThanhToan.addActionListener(this);
         btnXuatHoaDonTam.addActionListener(this);
         btnKetCa.addActionListener(this);
@@ -133,7 +133,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnXoaSanPham.setFont(fntMid);
         btnTimSanPham.setFont(fntMid);
         btnTheThanhVien.setFont(fntMid);
-        btnKhuyenMai.setFont(fntMid);
+        btnTamDungBan.setFont(fntMid);
         btnKieuThanhToan.setFont(fntMid);
         btnXuatHoaDonTam.setFont(fntMid);
         btnKetCa.setFont(fntMid);
@@ -221,26 +221,26 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         Box boxButtonRightTop = Box.createVerticalBox();
 
         setFixedSize(btnTheThanhVien);
-        setFixedSize(btnKhuyenMai);
+        setFixedSize(btnTamDungBan);
         setFixedSize(btnKieuThanhToan);
         setFixedSize(btnXuatHoaDonTam);
         setFixedSize(btnKetCa);
 
         btnTheThanhVien.setFocusPainted(false);
-        btnKhuyenMai.setFocusPainted(false);
+        btnTamDungBan.setFocusPainted(false);
         btnKieuThanhToan.setFocusPainted(false);
         btnXuatHoaDonTam.setFocusPainted(false);
         btnKetCa.setFocusPainted(false);
 
         btnTheThanhVien.setBackground(Color.RED);
-        btnKhuyenMai.setBackground(Color.GREEN);
+        btnTamDungBan.setBackground(Color.GREEN);
         btnKieuThanhToan.setBackground(Color.CYAN);
         btnXuatHoaDonTam.setBackground(Color.CYAN);
         btnKetCa.setBackground(Color.CYAN);
 
         boxButtonRightTop.add(btnTheThanhVien);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
-        boxButtonRightTop.add(btnKhuyenMai);
+        boxButtonRightTop.add(btnTamDungBan);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnKieuThanhToan);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
@@ -355,17 +355,13 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc4.fill = GridBagConstraints.BOTH;
         container.add(table3, gbc4);
 
-
         ConnectDB.getInstance().connect();
-
         loadData_sanPham();
-
 
         setSize(1200,800);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
-
 
     }
 
@@ -393,14 +389,25 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             updateSubTotal();
         }
         else if(o == btnTimSanPham){
-
+            String masp = txtMaSanPham.getText();
+            tblSanPhamKho.clearSelection();
+            for(int i = 0; i< dtmSanPhamKho.getRowCount(); i++){
+                if(masp.equalsIgnoreCase(dtmSanPhamKho.getValueAt(i,0).toString())){
+                    tblSanPhamKho.setRowSelectionInterval(i,i);
+                }
+            }
         }
         else if(o == btnXoaSanPham){
-
+            int rowSelected = tblSanPhamHoaDon.getSelectedRow();
+            if(rowSelected == -1){
+                JOptionPane.showMessageDialog(this,"Vui lòng chọn sản phẩm từ table hóa đơn!");
+                return;
+            }
+            dtmSanPhamHoaDon.removeRow(rowSelected);
+            updateSubTotal();
         }
-        else if(o == btnKhuyenMai){
-            String maGiamGia = JOptionPane.showInputDialog(this,"Nhập mã giảm giá");
-
+        else if(o == btnTamDungBan){
+            showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
 
@@ -412,7 +419,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         }
         else if(o == btnKetCa){
-            int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn tắt chứ?");
+            int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
             if(option == JOptionPane.YES_OPTION){
                 this.dispose();
                 new LoginGUI();
@@ -429,7 +436,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
             System.out.println(txtTongThanhTien.getText());
         }
-        total = total - (total/100)*giamGia;
         txtTongThanhTien.setText(total.toString() + " VND");
     }
 
@@ -445,10 +451,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
     public void loadData_sanPham(){
         SanPham_DAO spDao = new SanPham_DAO();
-        System.out.println("tét");
         listSanPham = spDao.getListSanPham();
-        System.out.println(listSanPham);
-        System.out.println("tét");
 
         for(int i = 0; i< listSanPham.size(); i++){
 
@@ -461,6 +464,67 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             };
             dtmSanPhamKho.addRow(rowData);
         }
+    }
+
+    public static void showLoginDialog(String username) {
+        // custom lai layout cho dialog
+        JTextField usernameField = new JTextField(10);
+        JTextField passwordField = new JTextField(10);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(new JLabel("Tên đăng nhập:"));
+        panel.add(usernameField);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new JLabel("Mật khẩu:"));
+        panel.add(passwordField);
+        panel.add(Box.createVerticalStrut(10));
+
+        JButton okButton = new JButton("OK");
+        panel.add(okButton);
+
+        // Tạo JOptionPane không có nút mặc định
+        JOptionPane optionPane = new JOptionPane(
+                panel,
+                JOptionPane.PLAIN_MESSAGE,
+                JOptionPane.DEFAULT_OPTION,
+                null,
+                new Object[]{}, // Không có nút nào mặc định
+                null
+        );
+
+        // custom lại dialog, dialog là dạng hộp thoại thông báo,xác nhận,....
+        JDialog dialog = optionPane.createDialog("Đang tạm dừng bán - Vui lòng đăng nhập");
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE); // nhấn nút X ko có j xảy ra - do nothing
+        // dùng dialog vì có thể thực hiện cái setDefaultCLoseOperation này, JPanel ko thể
+        dialog.setModal(true);
+        // modal là dạng dialog giống modal của web,
+        // chặn tương tác với các cửa sổ khác cho đến khi modal bị đóng
+
+        okButton.addActionListener(e -> { // add actionlistener cho button ok
+            String user = usernameField.getText();
+            String pass = passwordField.getText();
+
+            TaiKhoan_DAO tkdao = new TaiKhoan_DAO();
+            TaiKhoan tkUserHienTai = tkdao.getTaiKhoan(username);
+            if(tkUserHienTai == null){
+                System.out.println("acacacac");
+                return;
+            }else{
+
+                System.out.println(tkUserHienTai.getUsername());
+                System.out.println(tkUserHienTai.toString());
+                System.out.println(tkUserHienTai.getPassword());
+            }
+            if (username.equals(user) && tkUserHienTai.getPassword().equals(pass)) {
+                JOptionPane.showMessageDialog(panel, "Đăng nhập thành công!");
+                dialog.dispose(); // chỉ dispose khi check đúng pass
+            } else {
+                JOptionPane.showMessageDialog(panel, "Sai tên đăng nhập hoặc mật khẩu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.setVisible(true);
     }
 
     @Override
@@ -502,3 +566,4 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
 }
+

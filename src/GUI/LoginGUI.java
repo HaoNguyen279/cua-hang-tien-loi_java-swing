@@ -161,7 +161,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 			
 			for(TaiKhoan tk : tklist) {
 				if(tk.getUsername().equals(user)&&tk.getPassword().equals(pwd)) {
-					if(tk.getRole().equals("NhanVien")) {
+					if(tk.getRole().equals("employee")) {
 						loginFrame.dispose();
 						//lay ten nhan vien
 						
@@ -171,7 +171,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 					}
 					else {
 						loginFrame.dispose();
-						new AdminGUI();
+						new ManagementApp();
 						return;
 					}
 				}
