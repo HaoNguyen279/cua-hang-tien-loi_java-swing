@@ -6,6 +6,10 @@
 
 package DAO;
 
+import Entity.NhanVien;
+
+import java.util.ArrayList;
+
 /*
  * @description:
  * @author:
@@ -13,6 +17,13 @@ package DAO;
  * @version:    1.0
  */
 public class NhanVien_Dao {
+    ArrayList<NhanVien> dsnv;
+    NhanVien nv;
+    public NhanVien_Dao(){
+        dsnv = new ArrayList<NhanVien>();
+        nv = new NhanVien();
+    }
+
 
 
 }
