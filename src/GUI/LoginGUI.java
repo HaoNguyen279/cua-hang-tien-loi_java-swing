@@ -1,6 +1,10 @@
 package GUI;
 
 import ConnectDB.ConnectDB;
+import DAO.NhanVien_Dao;
+import DAO.TaiKhoan_DAO;
+import Entity.NhanVien;
+import Entity.TaiKhoan;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -23,6 +27,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 	static String url = "image/gradientBgLogin.png";
 	static File file = new File(url);
 	private JFrame loginFrame;
+	private String name;
 	public LoginGUI() {
 		createLoginWindow();
 	}
@@ -148,26 +153,30 @@ public class LoginGUI extends JFrame implements ActionListener {
 		try {
 			String user = txtUsername.getText();
 			String pwd = txtPassword.getText();
-			ConnectDB.getInstance();
-			Connection con = ConnectDB.getConnection();
-			Statement sta = con.createStatement();
-			String sql = "select * from TaiKhoan";
-			ResultSet rs = sta.executeQuery(sql);
-			int dem = 0;
-			ArrayList<Integer> id = new ArrayList<>();
-			ArrayList<String> ho = new ArrayList<>();
-			while(rs.next()) {
-				id.add(rs.getInt(1));
-				ho.add(rs.getString(2));
-				dem++;
-			}
-			for(int i=0;i<dem;i++) {
-				if(id.get(i).toString().equals(user)&&ho.get(i).equals(pwd)) {
-					loginFrame.dispose();
-					new EmployeeGUI(542234,"Nguyễn Văn Jack");
-					return;
+			TaiKhoan_DAO tk_dao = new TaiKhoan_DAO();
+			ArrayList<TaiKhoan> tklist = new ArrayList<TaiKhoan>();
+			tklist=tk_dao.getListTaiKhoan();
+			//lay ten nhan vien
+			NhanVien_Dao nv_dao = new NhanVien_Dao();
+			
+			for(TaiKhoan tk : tklist) {
+				if(tk.getUsername().equals(user)&&tk.getPassword().equals(pwd)) {
+					if(tk.getRole().equals("NhanVien")) {
+						loginFrame.dispose();
+						//lay ten nhan vien
+						
+						NhanVien nv = nv_dao.getNhanVien(user);
+						new EmployeeGUI(user,nv.getTenNhanVien());
+						return;
+					}
+					else {
+						loginFrame.dispose();
+						new AdminGUI();
+						return;
+					}
 				}
 			}
+
 			JOptionPane.showMessageDialog(this,"Sai tài khoản hoặc mật khẩu!");
 		} catch (Exception e) {
 			throw new RuntimeException(e);

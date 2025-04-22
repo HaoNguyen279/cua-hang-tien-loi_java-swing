@@ -37,10 +37,12 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
     private ArrayList<SanPham> listSanPham;
     private int giamGia = 50;
-    public EmployeeGUI(int username, String name){
+    public EmployeeGUI(String username, String name){
         super();
-
-        JLabel userid = new JLabel("userid: " + String.valueOf(username));
+        
+        
+        
+        JLabel userid = new JLabel("userid: " + username);
         JLabel employeeName = new JLabel("name: "+ name);
 
 
@@ -368,7 +370,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     public static void main(String[] args) {
-        new EmployeeGUI(0,null);
+        new EmployeeGUI(null,null);
     }
 
     @Override
@@ -413,7 +415,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn tắt chứ?");
             if(option == JOptionPane.YES_OPTION){
                 this.dispose();
-                System.exit(0);
+                new LoginGUI();
             }
         }
     }
