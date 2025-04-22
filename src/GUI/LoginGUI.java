@@ -1,9 +1,16 @@
 package GUI;
 
+import ConnectDB.ConnectDB;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -79,7 +86,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 		pnlRight.add(test2);
 		pnlRight.add(test4);
 		pnlRight.add(test6);
-
+		ConnectDB.getInstance().connect();
 		//
 		btnLogin.addActionListener(this);
 		loginFrame.setLayout(new GridLayout(1,2));
@@ -132,19 +139,38 @@ public class LoginGUI extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object o = e.getSource();
-		if(o==btnLogin) {
-//			validateLogin();
-
+		if(o == btnLogin) {
+			validateLogin();
 		}
 	}
 
 	private void validateLogin() {
-		String user = txtUsername.getText();
-		String pwd = txtPassword.getText();
-		//can co database
-		//test
-		if(user.equals("admin")&&pwd.equals("password")) {
-
+		try {
+			String user = txtUsername.getText();
+			String pwd = txtPassword.getText();
+			ConnectDB.getInstance();
+			Connection con = ConnectDB.getConnection();
+			Statement sta = con.createStatement();
+			String sql = "select * from TaiKhoan";
+			ResultSet rs = sta.executeQuery(sql);
+			int dem = 0;
+			ArrayList<Integer> id = new ArrayList<>();
+			ArrayList<String> ho = new ArrayList<>();
+			while(rs.next()) {
+				id.add(rs.getInt(1));
+				ho.add(rs.getString(2));
+				dem++;
+			}
+			for(int i=0;i<dem;i++) {
+				if(id.get(i).toString().equals(user)&&ho.get(i).equals(pwd)) {
+					loginFrame.dispose();
+					new EmployeeGUI(542234,"Nguyễn Văn Jack");
+					return;
+				}
+			}
+			JOptionPane.showMessageDialog(this,"Sai tài khoản hoặc mật khẩu!");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

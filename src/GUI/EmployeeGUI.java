@@ -29,16 +29,21 @@ import java.util.ArrayList;
  */
 public class EmployeeGUI extends JFrame implements ActionListener , MouseListener {
     private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham;
-    private JTextField  txtMaSanPham;
+    private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien;
     private JButton btnThemSanPham, btnXoaSanPham, btnTimSanPham,
-            btnTheThanhVien, btnKhuyenMai, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa;
+            btnTheThanhVien, btnKhuyenMai, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
 
     private ArrayList<SanPham> listSanPham;
-
-    public EmployeeGUI(){
+    private int giamGia = 50;
+    public EmployeeGUI(int username, String name){
         super();
+
+        JLabel userid = new JLabel("userid: " + String.valueOf(username));
+        JLabel employeeName = new JLabel("name: "+ name);
+
+
         Font fntMid = new Font("Roboto", Font.PLAIN, 18);
 
 
@@ -61,9 +66,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         tblSanPhamHoaDon.setDefaultEditor(Object.class,cellEditor);
         Object[] sp = {"SP123" , "Nuoc ngot" , "Nuoc uong",123, 8500};
-        dtmSanPhamHoaDon.addRow(sp);
-        dtmSanPhamHoaDon.addRow(sp);
-        dtmSanPhamHoaDon.addRow(sp);
+
 
 
         // table 2
@@ -90,17 +93,27 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         txtMaSanPham.setMaximumSize(new Dimension(txtMaSanPham.getWidth(), 50));
 
 
-
+        // Init icon
+        ImageIcon membership_icon = new ImageIcon("image/membership.png");
+        ImageIcon voucher_icon = new ImageIcon("image/voucher.png");
+        ImageIcon payment_icon = new ImageIcon("image/payment.png");
+        ImageIcon bill_icon = new ImageIcon("image/bill.png");
         // Init JButtons
         btnThemSanPham = new JButton("Thêm sản phẩm");
         btnXoaSanPham = new JButton("Xóa sản phẩm");
         btnTimSanPham = new JButton("Tìm sản phẩm");
         btnTheThanhVien = new JButton("Nhập mã thành viên");
         btnKhuyenMai = new JButton("Nhập mã khuyến mãi");
-        btnKieuThanhToan  = new JButton("Chọn kiểu thanh toán");
+        btnKieuThanhToan  = new JButton("Kiểu thanh toán");
         btnXuatHoaDonTam = new JButton("Xuất hóa đơn");
         btnKetCa = new JButton("Kết ca");
+        btnXuatHoaDon = new JButton("Xuất hóa đơn");
 
+        // ad icon
+        btnTheThanhVien.setIcon(new ImageIcon(membership_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnKhuyenMai.setIcon(new ImageIcon(voucher_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnKieuThanhToan.setIcon(new ImageIcon(payment_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnXuatHoaDonTam.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
 
 
         // Add ActionListener for buttons
@@ -112,7 +125,17 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnKieuThanhToan.addActionListener(this);
         btnXuatHoaDonTam.addActionListener(this);
         btnKetCa.addActionListener(this);
+        btnXuatHoaDon.addActionListener(this);
 
+        btnThemSanPham.setFont(fntMid);
+        btnXoaSanPham.setFont(fntMid);
+        btnTimSanPham.setFont(fntMid);
+        btnTheThanhVien.setFont(fntMid);
+        btnKhuyenMai.setFont(fntMid);
+        btnKieuThanhToan.setFont(fntMid);
+        btnXuatHoaDonTam.setFont(fntMid);
+        btnKetCa.setFont(fntMid);
+        btnXuatHoaDon.setFont(fntMid);
 
         // Add MouseListener for tables
         tblSanPhamHoaDon.addMouseListener(this);
@@ -140,9 +163,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         lblTongTien.setPreferredSize(lblTongThanhTien.getPreferredSize());
         lblGiamGia.setPreferredSize(lblTongThanhTien.getPreferredSize());
 
-        JTextField txtTongTien = new JTextField(20);
-        JTextField txtGiamGia = new JTextField(20);
-        JTextField txtTongThanhTien = new JTextField(20);
+        txtTongTien = new JTextField(20);
+        txtGiamGia = new JTextField(20);
+        txtTongThanhTien = new JTextField(20);
 
         txtTongThanhTien.setFont(fntMid);
         txtGiamGia.setFont(fntMid);
@@ -239,9 +262,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
 
         Box boxButton = Box.createVerticalBox();
-        btnThemSanPham.setMaximumSize(new Dimension(150,40));
-        btnTimSanPham.setMaximumSize(new Dimension(150,40));
-        btnXoaSanPham.setMaximumSize(new Dimension(150,40));
+        btnThemSanPham.setMaximumSize(new Dimension(150,50));
+        btnTimSanPham.setMaximumSize(new Dimension(150,50));
+        btnXoaSanPham.setMaximumSize(new Dimension(150,50));
         btnXoaSanPham.setFocusPainted(false);
         btnTimSanPham.setFocusPainted(false);
         btnThemSanPham.setFocusPainted(false);
@@ -274,8 +297,15 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         table2.add(boxButton, BorderLayout.EAST);
 
 
-        JPanel table3 = new JPanel();
-        table3.setBackground(Color.BLUE);
+        // Panel xanh duong DUOI PHAI ___        END
+        JPanel table3 = new JPanel(new BorderLayout());
+
+        JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        pnlUserInfo.add(userid);
+        pnlUserInfo.add(employeeName);
+
+        table3.add(pnlUserInfo, BorderLayout.SOUTH);
+        table3.add(btnXuatHoaDon, BorderLayout.CENTER);
 
 
         // Panel xanh lá (3x2)
@@ -338,7 +368,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     public static void main(String[] args) {
-        new EmployeeGUI();
+        new EmployeeGUI(0,null);
     }
 
     @Override
@@ -358,8 +388,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 tblSanPhamKho.getValueAt(rowSelected,3)
             };
             dtmSanPhamHoaDon.addRow(data);
-
-
+            updateSubTotal();
         }
         else if(o == btnTimSanPham){
 
@@ -368,6 +397,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         }
         else if(o == btnKhuyenMai){
+            String maGiamGia = JOptionPane.showInputDialog(this,"Nhập mã giảm giá");
 
         }
         else if(o == btnTheThanhVien){
@@ -379,12 +409,32 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         else if(o == btnXuatHoaDonTam){
 
         }
+        else if(o == btnKetCa){
+            int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn tắt chứ?");
+            if(option == JOptionPane.YES_OPTION){
+                this.dispose();
+                System.exit(0);
+            }
+        }
+    }
+    private void updateSubTotal(){
+        Double total = 0.0;
+        Double soLuong = 0.0, donGia = 0.0;
+        for(int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++){
+            soLuong = Double.parseDouble((tblSanPhamHoaDon.getValueAt(i,3)).toString());
+            donGia = Double.parseDouble((tblSanPhamHoaDon.getValueAt(i,4)).toString());
+            total += soLuong * donGia;
+
+            System.out.println(txtTongThanhTien.getText());
+        }
+        total = total - (total/100)*giamGia;
+        txtTongThanhTien.setText(total.toString() + " VND");
     }
 
     private void setFixedSize(JButton button) { // su dung gridbaglayout ko có tác dụng set size
         // nên tạo function set size cho button
-        int width = 150;
-        int height = 50;
+        int width = 230;
+        int height = 70;
         Dimension size = new Dimension(width, height);
         button.setPreferredSize(size);
         button.setMaximumSize(size);
@@ -408,8 +458,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             listSanPham.get(i).getSoLuongKho()
             };
             dtmSanPhamKho.addRow(rowData);
-
-
         }
     }
 

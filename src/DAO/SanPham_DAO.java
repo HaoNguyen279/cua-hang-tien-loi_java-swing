@@ -58,5 +58,27 @@ public class SanPham_DAO {
 
     }
 
+    public boolean update(SanPham sp){
+        try {
+            ConnectDB.getInstance();
+            Connection con = ConnectDB.getConnection();
+            Statement statement = con.createStatement();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    public boolean create(SanPham sp){
+        try{
+            ConnectDB.getInstance();
+            Connection con = ConnectDB.getConnection();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return true;
+    }
+
 
 }
