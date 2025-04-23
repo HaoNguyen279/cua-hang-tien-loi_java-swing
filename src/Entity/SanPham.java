@@ -1,6 +1,7 @@
 package Entity;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class SanPham {
 	private String maSanPham;
@@ -32,6 +33,28 @@ public class SanPham {
 		this.hanSuDung = null;
 		this.soLuongKho = 0;
 		this.donGia = 0.0;
+	}
+	public SanPham(String maSp) {
+		this.maSanPham = maSp;
+		this.tenSanPham = null;
+		this.loaiSanPham = null;
+		this.nhaCungCap = null;
+		this.ngaySanXuat = null;
+		this.hanSuDung = null;
+		this.soLuongKho = 0;
+		this.donGia = 0.0;
+	}
+
+	public SanPham(String masp, Double dongia2) {
+		// TODO Auto-generated constructor stub
+		this.maSanPham = masp;
+		this.tenSanPham = null;
+		this.loaiSanPham = null;
+		this.nhaCungCap = null;
+		this.ngaySanXuat = null;
+		this.hanSuDung = null;
+		this.soLuongKho = 0;
+		this.donGia = dongia2;
 	}
 
 	public String getMaSanPham() {
@@ -97,6 +120,25 @@ public class SanPham {
 	public void setDonGia(double donGia) {
 		this.donGia = donGia;
 	}
+	
+
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(maSanPham);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SanPham other = (SanPham) obj;
+		return Objects.equals(maSanPham, other.maSanPham);
+	}
 
 	@Override
 	public String toString() {
@@ -109,6 +151,6 @@ public class SanPham {
 				", hanSuDung=" + hanSuDung +
 				", soLuongKho=" + soLuongKho +
 				", donGia=" + donGia +
-				'}' + "\n";
+				'}';
 	}
 }

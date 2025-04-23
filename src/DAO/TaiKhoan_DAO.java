@@ -60,16 +60,23 @@ public class TaiKhoan_DAO {
         }
         return tk;
     }
-
-	public static void main(String[] args) {
-		ConnectDB.getInstance().connect();
-		TaiKhoan_DAO dao = new TaiKhoan_DAO();
-		ArrayList<TaiKhoan> tk = new ArrayList<TaiKhoan>();
-		tk=dao.getListTaiKhoan();
-		for(TaiKhoan tv : tk) {
-			System.out.println(tv);
+    
+    public boolean delete(String username){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n = 0;
+        try {
+			stmt = con.prepareStatement("delete from TaiKhoan where username = ?");
+			stmt.setString(1, username);
+			n = stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
+        return n>0;
 	}
+
+
 	
 	
 	

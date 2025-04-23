@@ -16,6 +16,15 @@ public class NhanVien {
 	public NhanVien() {
 		super();
 	}
+	
+
+
+
+	public NhanVien(String maNhanVien) {
+		super();
+		this.maNhanVien = maNhanVien;
+	}
+
 
 
 

@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -81,22 +82,69 @@ public class NhanVien_Dao {
         return nv;
     }
     
-    
-    
-    
-    public static void main(String[] args) {
-		ConnectDB.getInstance().connect();
-		NhanVien_Dao dao = new NhanVien_Dao();
-		ArrayList<NhanVien> ds = new ArrayList<NhanVien>();
-//		ds = dao.getListNhanVien();
-//		for(NhanVien n : ds) {
-//			System.out.println(n);
-//		}
-		NhanVien nv = dao.getNhanVien("101");
-		System.out.println(nv);
-		
-		
+    public boolean update(NhanVien nv){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n =0 ;
+        try {
+        	stmt = con.prepareStatement("update NhanVien set TenNhanVien=?,NgaySinh=?,NgayVaoLam=?,ChucVu=? where MaNhanVien=?");
+        	stmt.setString(1, nv.getTenNhanVien());
+        	stmt.setDate(2,nv.getNgaySinh());
+        	stmt.setDate(3, nv.getNgayVaoLam());
+        	stmt.setString(4, nv.getChucVu());
+        	stmt.setString(5, nv.getMaNhanVien());
+        	n = stmt.executeUpdate();
+        }catch (SQLException e) {
+			e.printStackTrace();
+		}
+   
+        return n>0;	
+    }
+
+    public boolean create(NhanVien nv){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n = 0;
+        try {
+			stmt = con.prepareStatement("insert into" +" NhanVien values(?,?,?,?,?)");
+			stmt.setString(1, nv.getMaNhanVien());
+			stmt.setString(2, nv.getTenNhanVien());
+			stmt.setDate(3, nv.getNgaySinh());
+			stmt.setDate(4, nv.getNgayVaoLam());
+			stmt.setString(5, nv.getChucVu());
+			n =stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+        return n>0;
 	}
+    
+	public boolean delete(String manv){
+		
+	    ConnectDB.getInstance();
+	    Connection con = ConnectDB.getConnection();
+	    PreparedStatement stmt = null;
+	    int n = 0;
+	    try {
+	    	ConnectDB.getInstance().connect();
+			TaiKhoan_DAO dao = new TaiKhoan_DAO();
+			dao.delete(manv);
+			stmt = con.prepareStatement("delete from NhanVien where MaNhanVien = ?");
+			stmt.setString(1, manv);
+			n = stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	    return n>0;
+	}
+    	
+    
+    
+    
+    
+
     
 
 

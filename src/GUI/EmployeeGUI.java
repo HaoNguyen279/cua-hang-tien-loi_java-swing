@@ -7,19 +7,29 @@
 package GUI;
 
 import ConnectDB.ConnectDB;
+import DAO.KhachHang_DAO;
 import DAO.SanPham_DAO;
 import DAO.TaiKhoan_DAO;
+import Entity.KhachHang;
 import Entity.SanPham;
 import Entity.TaiKhoan;
 
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.NumberFormatter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * @description: Giao diện chính dành cho nhân viên của cửa hàng
@@ -28,25 +38,26 @@ import java.util.ArrayList;
  * @version:    1.0
  */
 public class EmployeeGUI extends JFrame implements ActionListener , MouseListener {
-    private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham;
-    private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien;
+    private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham, lblHangThanhVien, lblPhanTramGiam,lblHinhThucThanhToan;
+    private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
     private JButton btnThemSanPham, btnXoaSanPham, btnTimSanPham,
             btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
 
     private ArrayList<SanPham> listSanPham;
+    private Map<SanPham, Integer> listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+    
     private String username;
+    private Font fntMid = new Font("Roboto", Font.PLAIN, 18);
+    
     public EmployeeGUI(String username, String name){
-        super();
+        super("Quản lí bán hàng");
         this.username = username;
-        
-        
-        JLabel userid = new JLabel("userid: " + username);
-        JLabel employeeName = new JLabel("name: "+ name);
 
-
-        Font fntMid = new Font("Roboto", Font.PLAIN, 18);
+        lblMaNhanVien = new JLabel("userid: " + username);
+        lblTenNhanVien = new JLabel("name: "+ name);
+        lblMaNhanVien.setFont(fntMid);
 
 
         // table 1
@@ -57,6 +68,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 return column == 3; // can only edit on column 3
             }
         };
+
         tblSanPhamHoaDon = new JTable(dtmSanPhamHoaDon);
         tblSanPhamHoaDon.setRowHeight(30);
         tblSanPhamHoaDon.setFont(fntMid);
@@ -67,10 +79,50 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         DefaultCellEditor cellEditor = new DefaultCellEditor(txtCellTextField); // tạo 1 jtextfield tạm thời khi click vào cell
 
         tblSanPhamHoaDon.setDefaultEditor(Object.class,cellEditor);
-        Object[] sp = {"SP123" , "Nuoc ngot" , "Nuoc uong",123, 8500};
 
 
+        // Set up sự kiện khi người dùng thay đổi giá trị của ô ( số lượng )
+        DefaultCellEditor editor = (DefaultCellEditor) tblSanPhamHoaDon.getDefaultEditor(Object.class);
+        editor.addCellEditorListener(new CellEditorListener() { // Lắng nghe sự kiện tại các cell của table
+            @Override
+            public void editingStopped(ChangeEvent e) {
+                int row = tblSanPhamHoaDon.getSelectedRow();
+                int col = tblSanPhamHoaDon.getSelectedColumn();
+                
+                Object value = tblSanPhamHoaDon.getValueAt(row, col);
+                System.out.println("Người dùng vừa nhập xong ô tại [" + row + "," + col + "] với giá trị: " + value);
+                try {
+					int soLuongCheck = Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString());
+				} catch (Exception e2) {
+					// TODO: handle exception
+					System.out.println("cmmm sai r");
+					tblSanPhamHoaDon.setValueAt(1, row, col);
+					updateSubTotal();
+					return;
+				}
+                if(Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString()) <= 0) {
+                	tblSanPhamHoaDon.setValueAt(1, row, col);
+                }
+                updateSubTotal();
+                
+                String masp = tblSanPhamHoaDon.getValueAt(row, 0).toString();
+                int soLuong = Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, 3).toString());
+                
+                for (SanPham sp : listSanPham) {
+                    if (sp.getMaSanPham().equalsIgnoreCase(masp)) {
+                        listSanPhamHoaDon.put(sp, soLuong);
+                        break;
+                    }
+                }
+            }
 
+            @Override
+            public void editingCanceled(ChangeEvent e) {
+                System.out.println("Hủy chỉnh sửa");
+            }
+        });
+
+        
         // table 2
         String[] cols2 = {"Mã sản phẩm" , "Tên sản phẩm" , "Loại sản phẩm", "Đơn giá", "SL Kho"};
         dtmSanPhamKho = new DefaultTableModel(cols2,0){
@@ -80,32 +132,32 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             }
         };
         tblSanPhamKho = new JTable(dtmSanPhamKho);
-        tblSanPhamKho.setRowHeight(20);
+        tblSanPhamKho.setRowHeight(25);
         tblSanPhamKho.setFont(fntMid);
         tblSanPhamKho.getTableHeader().setFont(fntMid);
-        Object[] sp2 = {"fr79" , "ts pmo" , "Sybau", 1234,999};
-        dtmSanPhamKho.addRow(sp2);
-
-
 
         // Init JLabels
         lblMaNhanVien = new JLabel("Mã nhân viên" );
         lblMaSanPham = new JLabel("Nhập mã sản phẩm");
+        lblMaSanPham.setFont(fntMid);
         txtMaSanPham = new JTextField(40);
         txtMaSanPham.setMaximumSize(new Dimension(txtMaSanPham.getWidth(), 50));
 
 
         // Init icon
         ImageIcon membership_icon = new ImageIcon("image/membership.png");
-        ImageIcon voucher_icon = new ImageIcon("image/voucher.png");
+        ImageIcon pause_icon = new ImageIcon("image/pause.png");
         ImageIcon payment_icon = new ImageIcon("image/payment.png");
         ImageIcon bill_icon = new ImageIcon("image/bill.png");
+        ImageIcon exit_icon = new ImageIcon("image/exit.png");
+        ImageIcon invoice_icon = new ImageIcon("image/invoice.png");
+        
         // Init JButtons
         btnThemSanPham = new JButton("Thêm sản phẩm");
         btnXoaSanPham = new JButton("Xóa sản phẩm");
         btnTimSanPham = new JButton("Tìm sản phẩm");
         btnTheThanhVien = new JButton("Nhập mã thành viên");
-        btnTamDungBan = new JButton("Nhập mã khuyến mãi");
+        btnTamDungBan = new JButton("Tạm dừng bán");
         btnKieuThanhToan  = new JButton("Kiểu thanh toán");
         btnXuatHoaDonTam = new JButton("Xuất hóa đơn");
         btnKetCa = new JButton("Kết ca");
@@ -113,9 +165,11 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         // ad icon
         btnTheThanhVien.setIcon(new ImageIcon(membership_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
-        btnTamDungBan.setIcon(new ImageIcon(voucher_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnTamDungBan.setIcon(new ImageIcon(pause_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKieuThanhToan.setIcon(new ImageIcon(payment_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnXuatHoaDonTam.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnKetCa.setIcon(new ImageIcon(exit_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnXuatHoaDon.setIcon(new ImageIcon(invoice_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
 
 
         // Add ActionListener for buttons
@@ -128,7 +182,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnXuatHoaDonTam.addActionListener(this);
         btnKetCa.addActionListener(this);
         btnXuatHoaDon.addActionListener(this);
-
+        
         btnThemSanPham.setFont(fntMid);
         btnXoaSanPham.setFont(fntMid);
         btnTimSanPham.setFont(fntMid);
@@ -139,11 +193,26 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnKetCa.setFont(fntMid);
         btnXuatHoaDon.setFont(fntMid);
 
+        btnTheThanhVien.setFocusPainted(false);
+        btnTamDungBan.setFocusPainted(false);
+        btnKieuThanhToan.setFocusPainted(false);
+        btnXuatHoaDonTam.setFocusPainted(false);
+        btnKetCa.setFocusPainted(false);
+        btnXuatHoaDon.setFocusPainted(false);
+
+        btnTheThanhVien.setBackground(Color.RED);
+        btnTamDungBan.setBackground(Color.GREEN);
+        btnKieuThanhToan.setBackground(Color.CYAN);
+        btnXuatHoaDonTam.setBackground(Color.CYAN);
+        btnKetCa.setBackground(Color.CYAN);
+        btnXuatHoaDon.setBackground(Color.CYAN);
+
+
         // Add MouseListener for tables
         tblSanPhamHoaDon.addMouseListener(this);
         tblSanPhamKho.addMouseListener(this);
 
-
+        // GridBagLayout 
         Container container = this.getContentPane();
         container.setLayout(new GridBagLayout());
 
@@ -151,7 +220,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         JPanel table = new JPanel(new BorderLayout());
 
         JPanel pnlThanhTien = new JPanel(new BorderLayout());
-
+        JPanel pnlGiamGia = new JPanel(new BorderLayout());
+        
+        
         JPanel pnlRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel pnlRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel pnlRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -185,10 +256,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         txtGiamGia.setHorizontalAlignment(SwingConstants.RIGHT);
         txtTongTien.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        // temp ti xoa
-        txtTongThanhTien.setText("1,099,000 VND");
-        txtGiamGia.setText("10% - 109,900 VND");
-        txtTongTien.setText("169,099.000 VND");
 
         pnlRow1.add(lblTongTien);
         pnlRow1.add(txtTongTien);
@@ -198,6 +265,68 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         pnlRow3.add(lblTongThanhTien);
         pnlRow3.add(txtTongThanhTien);
+        
+        
+        JPanel pnlGiamGiaThanhToan = new JPanel(new BorderLayout());
+        
+        JPanel pnlLeftRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlLeftRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlLeftRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        lblHangThanhVien  = new JLabel("Hạng thành viên");
+        lblPhanTramGiam = new JLabel("Phần trăm giảm");
+        lblHinhThucThanhToan = new JLabel("Hình thức thanh toán");
+        
+        lblHangThanhVien.setFont(fntMid);
+        lblPhanTramGiam.setFont(fntMid);
+        lblHinhThucThanhToan.setFont(fntMid);
+        lblHangThanhVien.setPreferredSize(lblHinhThucThanhToan.getPreferredSize());
+        lblPhanTramGiam.setPreferredSize(lblHinhThucThanhToan.getPreferredSize());
+        
+        
+        
+        
+        
+        txtHangThanhVien = new JTextField(20);
+        txtPhanTramGiam = new JTextField(20);
+        txtHinhThucThanhToan = new JTextField(20);
+
+        txtHangThanhVien.setFont(fntMid);
+        txtPhanTramGiam.setFont(fntMid);
+        txtHinhThucThanhToan.setFont(fntMid);
+
+        txtHangThanhVien.setBorder(BorderFactory.createEmptyBorder());
+        txtPhanTramGiam.setBorder(BorderFactory.createEmptyBorder());
+        txtHinhThucThanhToan.setBorder(BorderFactory.createEmptyBorder());
+
+        txtHangThanhVien.setEditable(false);
+        txtPhanTramGiam.setEditable(false);
+        txtHinhThucThanhToan.setEditable(false);
+        
+        txtHangThanhVien.setText("Không");
+        txtPhanTramGiam.setText("0%"); 	
+        txtHinhThucThanhToan.setText("Thanh toán bằng tiền mặt");
+
+        txtHangThanhVien.setHorizontalAlignment(SwingConstants.RIGHT);
+        txtPhanTramGiam.setHorizontalAlignment(SwingConstants.RIGHT);
+        txtHinhThucThanhToan.setHorizontalAlignment(SwingConstants.RIGHT);
+        
+        
+        pnlLeftRow1.add(lblHangThanhVien);
+        pnlLeftRow1.add(txtHangThanhVien);
+
+        pnlLeftRow2.add(lblPhanTramGiam);
+        pnlLeftRow2.add(txtPhanTramGiam);
+
+        pnlLeftRow3.add(lblHinhThucThanhToan);
+        pnlLeftRow3.add(txtHinhThucThanhToan);
+        
+        
+        Box boxGiamGia = Box.createVerticalBox();
+        boxGiamGia.add(pnlLeftRow1);
+        boxGiamGia.add(pnlLeftRow2);
+        boxGiamGia.add(pnlLeftRow3);
+        
 
         Box boxThanhTien = Box.createVerticalBox();
         boxThanhTien.add(pnlRow1);
@@ -205,7 +334,8 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxThanhTien.add(pnlRow3);
 
         pnlThanhTien.add(boxThanhTien,BorderLayout.EAST);
-
+        pnlThanhTien.add(boxGiamGia,BorderLayout.WEST);
+        
         JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
         scrollPane.setPreferredSize(new Dimension(tblSanPhamHoaDon.getWidth(),600)); // ---- jackk
         table.add(scrollPane,BorderLayout.CENTER);
@@ -225,18 +355,8 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         setFixedSize(btnKieuThanhToan);
         setFixedSize(btnXuatHoaDonTam);
         setFixedSize(btnKetCa);
+        setFixedSize(btnXuatHoaDon);
 
-        btnTheThanhVien.setFocusPainted(false);
-        btnTamDungBan.setFocusPainted(false);
-        btnKieuThanhToan.setFocusPainted(false);
-        btnXuatHoaDonTam.setFocusPainted(false);
-        btnKetCa.setFocusPainted(false);
-
-        btnTheThanhVien.setBackground(Color.RED);
-        btnTamDungBan.setBackground(Color.GREEN);
-        btnKieuThanhToan.setBackground(Color.CYAN);
-        btnXuatHoaDonTam.setBackground(Color.CYAN);
-        btnKetCa.setBackground(Color.CYAN);
 
         boxButtonRightTop.add(btnTheThanhVien);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
@@ -247,11 +367,19 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButtonRightTop.add(btnXuatHoaDonTam);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnKetCa);
+        boxButtonRightTop.add(Box.createVerticalStrut(30));
+        boxButtonRightTop.add(btnXuatHoaDon);
 
-        boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
+        JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        pnlUserInfo.add(lblMaNhanVien);
+        pnlUserInfo.add(lblTenNhanVien);
+
+
+        boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,30,0));
 
         JPanel pnlWrapper = new JPanel(new GridBagLayout());
         pnlWrapper.add(boxButtonRightTop);
+//        pnlWrapper.add(pnlUserInfo);
 
         table1.add(pnlWrapper);
 
@@ -284,30 +412,30 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         JPanel test69 = new JPanel(new BorderLayout());
 
         JScrollPane scrollPane2 = new JScrollPane(tblSanPhamKho);
-//        scrollPane2.setPreferredSize(tblSanPhamKho.getPreferredSize());
         scrollPane2.setPreferredSize(new Dimension(500, tblSanPhamKho.getRowHeight() * 4 + tblSanPhamKho.getTableHeader().getPreferredSize().height));
         test69.add(scrollPane2,BorderLayout.CENTER);
 
         JPanel pnlContainerOfTxtMaSanPham = new JPanel();
-
-        pnlContainerOfTxtMaSanPham.setBorder(BorderFactory.createEmptyBorder(0,0, 50,0));
+        
+        txtMaSanPham.setFont(fntMid);
+        pnlContainerOfTxtMaSanPham.setBorder(BorderFactory.createEmptyBorder(0,0, 10,0));
+        pnlContainerOfTxtMaSanPham.add(lblMaSanPham);
         pnlContainerOfTxtMaSanPham.add(txtMaSanPham);
-        test69.add(txtMaSanPham, BorderLayout.NORTH);
 
 
-        table2.add(test69, BorderLayout.CENTER);
+        table2.add(pnlContainerOfTxtMaSanPham, BorderLayout.NORTH);
+        table2.add(test69, BorderLayout.CENTER); // test69 là center
         table2.add(boxButton, BorderLayout.EAST);
 
 
         // Panel xanh duong DUOI PHAI ___        END
-        JPanel table3 = new JPanel(new BorderLayout());
-
-        JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        pnlUserInfo.add(userid);
-        pnlUserInfo.add(employeeName);
-
-        table3.add(pnlUserInfo, BorderLayout.SOUTH);
-        table3.add(btnXuatHoaDon, BorderLayout.CENTER);
+//        JPanel table3 = new JPanel(new BorderLayout());
+//
+//        table3.setBorder(BorderFactory.createEmptyBorder(50,100,0,100));
+//        JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
+//
+//        table3.add(pnlUserInfo, BorderLayout.SOUTH);
+//        table3.add(btnXuatHoaDon, BorderLayout.CENTER);
 
 
         // Panel xanh lá (3x2)
@@ -322,14 +450,14 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc1.fill = GridBagConstraints.BOTH;
         container.add(table, gbc1);
 
-        // Panel vàng (1x2)
+        // Panel vàng (1x3)
         GridBagConstraints gbc2 = new GridBagConstraints();
         gbc2.gridx = 4;
         gbc2.gridy = 0;
         gbc2.gridwidth = 1;
-        gbc2.gridheight = 2;
+        gbc2.gridheight = 3;
         gbc2.weightx = 1.0;
-        gbc2.weighty = 2.0;
+        gbc2.weighty = 3.0;
         gbc2.fill = GridBagConstraints.BOTH;
         container.add(table1, gbc2);
 
@@ -344,21 +472,12 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc3.fill = GridBagConstraints.BOTH;
         container.add(table2, gbc3);
 
-        // Panel xanh dương (1x1)
-        GridBagConstraints gbc4 = new GridBagConstraints();
-        gbc4.gridx = 4;
-        gbc4.gridy = 2;
-        gbc4.gridwidth = 1;
-        gbc4.gridheight = 1;
-        gbc4.weightx = 1.0;
-        gbc4.weighty = 1.0;
-        gbc4.fill = GridBagConstraints.BOTH;
-        container.add(table3, gbc4);
-
         ConnectDB.getInstance().connect();
         loadData_sanPham();
+//        setUndecorated(true);
 
-        setSize(1200,800);
+        setMinimumSize(new Dimension(1600, 800));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -373,19 +492,36 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
         if(o == btnThemSanPham){
-            int rowSelected = tblSanPhamKho.getSelectedRow();
-            if(rowSelected == -1){
-                JOptionPane.showMessageDialog(this,"Vui lòng chọn sản phẩm từ table kho!");
+        	int rowSelected = tblSanPhamKho.getSelectedRow();
+            if (rowSelected == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm từ table kho!");
                 return;
             }
-            Object[] data = {
-                tblSanPhamKho.getValueAt(rowSelected,0),
-                tblSanPhamKho.getValueAt(rowSelected,1),
-                tblSanPhamKho.getValueAt(rowSelected,2),
-                1,
-                tblSanPhamKho.getValueAt(rowSelected,3)
-            };
-            dtmSanPhamHoaDon.addRow(data);
+            String maspthem = tblSanPhamKho.getValueAt(rowSelected, 0).toString();
+            boolean daTonTai = false;
+
+            for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+                if (tblSanPhamHoaDon.getValueAt(i, 0).toString().equalsIgnoreCase(maspthem)) {
+                    // Tồn tại thì + 1
+                    int soLuongCu = Integer.parseInt(tblSanPhamHoaDon.getValueAt(i, 3).toString());
+                    tblSanPhamHoaDon.setValueAt(soLuongCu + 1, i, 3);
+                    daTonTai = true;
+                    break; // out loop
+                }
+            }
+            // Chuaw tồn tại thì thêm
+            if (!daTonTai) {
+                Object[] data = {
+                    tblSanPhamKho.getValueAt(rowSelected, 0),
+                    tblSanPhamKho.getValueAt(rowSelected, 1),
+                    tblSanPhamKho.getValueAt(rowSelected, 2),
+                    1,
+                    tblSanPhamKho.getValueAt(rowSelected, 3)
+                };
+                dtmSanPhamHoaDon.addRow(data);
+            }
+            tblSanPhamHoaDon.scrollRectToVisible(tblSanPhamHoaDon.getCellRect(tblSanPhamHoaDon.getRowCount(), 0, true));
+            updateHoaDon(rowSelected);
             updateSubTotal();
         }
         else if(o == btnTimSanPham){
@@ -394,6 +530,8 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             for(int i = 0; i< dtmSanPhamKho.getRowCount(); i++){
                 if(masp.equalsIgnoreCase(dtmSanPhamKho.getValueAt(i,0).toString())){
                     tblSanPhamKho.setRowSelectionInterval(i,i);
+                    tblSanPhamKho.scrollRectToVisible(tblSanPhamKho.getCellRect(i, 0, true)); // scroll đến chỗ selected row
+                    return;
                 }
             }
         }
@@ -403,6 +541,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 JOptionPane.showMessageDialog(this,"Vui lòng chọn sản phẩm từ table hóa đơn!");
                 return;
             }
+            String maspxoa = tblSanPhamHoaDon.getValueAt(rowSelected, 0).toString();
+            SanPham spxoa = new SanPham(maspxoa);
+            listSanPhamHoaDon.remove(spxoa);
             dtmSanPhamHoaDon.removeRow(rowSelected);
             updateSubTotal();
         }
@@ -410,13 +551,22 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
-
+        	Map.Entry<String, Integer> entry = nhapMaThanhVien().entrySet().iterator().next();
+        	// map.entry là 1 interface đại diện cho 1 cặp giá trị key-value
+        	 txtHangThanhVien.setText(entry.getKey());
+        	 txtPhanTramGiam.setText(entry.getValue().toString() + "%");
+        	updateSubTotal();
         }
         else if(o == btnKieuThanhToan){
-
+            choosePaymentMethod();
         }
         else if(o == btnXuatHoaDonTam){
-
+        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+        	    SanPham key = entry.getKey();
+        	    Integer value = entry.getValue();
+        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
+        	}
+        	System.out.println("Tong tien: " + txtTongThanhTien.getText());
         }
         else if(o == btnKetCa){
             int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
@@ -426,17 +576,39 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             }
         }
     }
+    
+    private void updateHoaDon(int rowSelected) {
+        String masp = tblSanPhamKho.getValueAt(rowSelected, 0).toString();
+        int soLuong = 0;
+
+        for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+            if (tblSanPhamHoaDon.getValueAt(i, 0).toString().equalsIgnoreCase(masp)) {
+                soLuong = Integer.parseInt(tblSanPhamHoaDon.getValueAt(i, 3).toString());
+                break;
+            }
+        }
+        for (SanPham sp : listSanPham) {
+            if (sp.getMaSanPham().equalsIgnoreCase(masp)) {
+                listSanPhamHoaDon.put(sp, soLuong);
+                break;
+            }
+        }
+    }
     private void updateSubTotal(){
         Double total = 0.0;
-        Double soLuong = 0.0, donGia = 0.0;
+        Double soLuong = 0.0, donGia = 0.0,giamGia = 0.0;
         for(int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++){
             soLuong = Double.parseDouble((tblSanPhamHoaDon.getValueAt(i,3)).toString());
             donGia = Double.parseDouble((tblSanPhamHoaDon.getValueAt(i,4)).toString());
             total += soLuong * donGia;
-
-            System.out.println(txtTongThanhTien.getText());
         }
-        txtTongThanhTien.setText(total.toString() + " VND");
+        DecimalFormat moneyFormat = new DecimalFormat("#,### VND");
+        
+        txtTongTien.setText(moneyFormat.format(total) );
+        giamGia = total/100 * Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
+        txtGiamGia.setText(moneyFormat.format(giamGia));
+        txtTongThanhTien.setText(moneyFormat.format(total-giamGia)  );
+        
     }
 
     private void setFixedSize(JButton button) { // su dung gridbaglayout ko có tác dụng set size
@@ -452,21 +624,19 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     public void loadData_sanPham(){
         SanPham_DAO spDao = new SanPham_DAO();
         listSanPham = spDao.getListSanPham();
-
-        for(int i = 0; i< listSanPham.size(); i++){
-
+        for (SanPham sanPham : listSanPham) {
             Object[] rowData = {
-            listSanPham.get(i).getMaSanPham(),
-            listSanPham.get(i).getTenSanPham(),
-            listSanPham.get(i).getLoaiSanPham(),
-            listSanPham.get(i).getDonGia(),
-            listSanPham.get(i).getSoLuongKho()
+                    sanPham.getMaSanPham(),
+                    sanPham.getTenSanPham(),
+                    sanPham.getLoaiSanPham(),
+                    sanPham.getDonGia(),
+                    sanPham.getSoLuongKho()
             };
             dtmSanPhamKho.addRow(rowData);
         }
     }
 
-    public static void showLoginDialog(String username) {
+    public void showLoginDialog(String username) {
         // custom lai layout cho dialog
         JTextField usernameField = new JTextField(10);
         JTextField passwordField = new JTextField(10);
@@ -511,13 +681,11 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 System.out.println("acacacac");
                 return;
             }else{
-
                 System.out.println(tkUserHienTai.getUsername());
                 System.out.println(tkUserHienTai.toString());
                 System.out.println(tkUserHienTai.getPassword());
             }
             if (username.equals(user) && tkUserHienTai.getPassword().equals(pass)) {
-                JOptionPane.showMessageDialog(panel, "Đăng nhập thành công!");
                 dialog.dispose(); // chỉ dispose khi check đúng pass
             } else {
                 JOptionPane.showMessageDialog(panel, "Sai tên đăng nhập hoặc mật khẩu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -525,6 +693,106 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         });
 
         dialog.setVisible(true);
+    }
+    public void choosePaymentMethod(){
+        JComboBox<String> cboPaymentMethod = new JComboBox<String>();
+        String[] paymentMethods = {"Thanh toán bằng tiền mặt", "Thanh toán bằng ngân hàng","Thanh toán bằng MOMO", "Thanh toán bằng VISA", "Thanh toán bằng Apple Pay"};
+        for(String pm : paymentMethods){
+            cboPaymentMethod.addItem(pm);
+        }
+
+        cboPaymentMethod.setMaximumSize(new Dimension(300,60));
+        cboPaymentMethod.setMinimumSize(new Dimension(300,60));
+        cboPaymentMethod.setFont(fntMid);
+
+        JButton btnOk = new JButton("Xác nhận");
+        btnOk.setFont(fntMid);
+        btnOk.setMaximumSize(new Dimension(200,50));
+        btnOk.setMinimumSize(new Dimension(200,50));
+        btnOk.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        btnOk.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
+        Box pnlPaymentCustomPanel = Box.createVerticalBox();
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
+        pnlPaymentCustomPanel.add(cboPaymentMethod);
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));
+        pnlPaymentCustomPanel.add(btnOk);
+
+
+
+        JOptionPane optionPane = new JOptionPane(
+                pnlPaymentCustomPanel, // component hiển thị trong dialog
+                JOptionPane.PLAIN_MESSAGE, // loại thông báo, PLAIN là ko có biểu tượng thông báo
+                JOptionPane.DEFAULT_OPTION, // Kiểu lựa chọn mặc định, do tự custom lại nút nên set là DEFAULT
+                new ImageIcon("image/payment.png"), // icon cho JDialog
+                new Object[]{}, // mảng button
+                null // button mặc định
+        );
+        JDialog dialog = optionPane.createDialog("Chọn hình thức thanh toán");
+        btnOk.addActionListener(e -> {
+        	String method = cboPaymentMethod.getSelectedItem().toString();
+        	txtHinhThucThanhToan.setText(method);
+        	dialog.dispose();
+        	
+        });
+        dialog.setVisible(true);
+
+    }
+    
+    
+    
+    public Map<String,Integer> nhapMaThanhVien(){
+    	
+    	Map<String, Integer> thanhVien = new HashMap<String, Integer>();
+    	JTextField txtMaThanhVien = new JTextField(20);
+    	
+        JButton btnOk = new JButton("Xác nhận");
+        btnOk.setFont(fntMid);
+        btnOk.setMaximumSize(new Dimension(200,50));
+        btnOk.setMinimumSize(new Dimension(200,50));
+        btnOk.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        Box pnlPaymentCustomPanel = Box.createVerticalBox();
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
+        pnlPaymentCustomPanel.add(txtMaThanhVien);
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));
+        pnlPaymentCustomPanel.add(btnOk);
+
+        JOptionPane optionPane = new JOptionPane(
+                pnlPaymentCustomPanel, // component hiển thị trong dialog
+                JOptionPane.PLAIN_MESSAGE, // loại thông báo, PLAIN là ko có biểu tượng thông báo
+                JOptionPane.DEFAULT_OPTION, // Kiểu lựa chọn mặc định, do tự custom lại nút nên set là DEFAULT
+                null, // icon cho JDialog
+                new Object[]{}, // mảng button
+                null // button mặc định
+        );
+        JDialog dialog = optionPane.createDialog("Nhập mã khách hàng");
+        btnOk.addActionListener(e -> {
+        	String makh = txtMaThanhVien.getText();
+        	System.out.println(makh);
+        	KhachHang_DAO khdao = new KhachHang_DAO();
+        	KhachHang kh = khdao.getKhachHang(makh);
+        	
+        	if(kh.getMaKhachHang() !=null) {
+        		JOptionPane.showMessageDialog(this, " tìm thấy khác hàng!");
+        		int phanTramGiam = 0;
+        		switch(kh.getHangThanhVien()) {
+        			case "Kim Cương":
+        				phanTramGiam = 10;
+        				break;
+        			case "Vàng":
+        				phanTramGiam = 5;
+        				break;
+        		}
+        		thanhVien.put(kh.getHangThanhVien(), phanTramGiam);
+        	}else {
+        		JOptionPane.showMessageDialog(this, "Không tìm thấy khác hàng!");
+        	}
+        	dialog.dispose();
+        });
+        
+        dialog.setVisible(true);
+        
+        return thanhVien;
     }
 
     @Override

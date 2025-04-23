@@ -1,5 +1,6 @@
 package Entity;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -9,11 +10,11 @@ public class KhachHang {
     private String soDienThoai;
     private String hangThanhVien;
     private int diemThanhVien;
-    private LocalDate ngayDangKyTV;
-    private ArrayList<HoaDon> lsMuaHang; //này là lịch sử mua hàng
+    private Date ngayDangKyTV;
+
 
     public KhachHang(String maKhachHang, String tenKhachHang, String soDienThoai, String hangThanhVien,
-                     int diemThanhVien, LocalDate ngayDangKyTV, ArrayList<HoaDon> lsMuaHang) {
+                     int diemThanhVien, Date ngayDangKyTV) {
         super();
         this.maKhachHang = maKhachHang;
         this.tenKhachHang = tenKhachHang;
@@ -21,11 +22,19 @@ public class KhachHang {
         this.hangThanhVien = hangThanhVien;
         this.diemThanhVien = diemThanhVien;
         this.ngayDangKyTV = ngayDangKyTV;
-        this.lsMuaHang = lsMuaHang;
     }
+    
+    
+    
+
+    public KhachHang() {
+		super();
+	}
 
 
-    public KhachHang(String maKhachHang) {
+
+
+	public KhachHang(String maKhachHang) {
         super();
         this.maKhachHang = maKhachHang;
     }
@@ -60,28 +69,21 @@ public class KhachHang {
     public void setDiemThanhVien(int diemThanhVien) {
         this.diemThanhVien = diemThanhVien;
     }
-    public LocalDate getNgayDangKyTV() {
+    public Date getNgayDangKyTV() {
         return ngayDangKyTV;
     }
-    public void setNgayDangKyTV(LocalDate ngayDangKyTV) {
+    public void setNgayDangKyTV(Date ngayDangKyTV) {
         this.ngayDangKyTV = ngayDangKyTV;
     }
-    public ArrayList<HoaDon> getLsMuaHang() {
-        return lsMuaHang;
-    }
-    public void setLsMuaHang(ArrayList<HoaDon> lsMuaHang) {
-        this.lsMuaHang = lsMuaHang;
-    }
+
 
     public void capNhatHangThanhVien(){
-        if(diemThanhVien > 1000){
+        if(diemThanhVien >= 500){
             setHangThanhVien("Kim cương");
-        } else if(diemThanhVien >= 500){
-            setHangThanhVien("Vàng");
         } else if(diemThanhVien >= 100){
-            setHangThanhVien("Bạc");
+            setHangThanhVien("Vàng");
         } else {
-            setHangThanhVien("Thành viên mới");
+            setHangThanhVien("Bạc");
         }
     }
 }
