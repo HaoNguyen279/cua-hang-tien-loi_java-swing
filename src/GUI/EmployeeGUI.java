@@ -6,11 +6,14 @@
 
 package GUI;
 
-import ConnectDB.ConnectDB;
+
+import DAO.HoaDon_DAO;
 import DAO.KhachHang_DAO;
 import DAO.SanPham_DAO;
 import DAO.TaiKhoan_DAO;
+import Entity.HoaDon;
 import Entity.KhachHang;
+import Entity.NhanVien;
 import Entity.SanPham;
 import Entity.TaiKhoan;
 
@@ -19,13 +22,19 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
+import ConnectDB.ConnectDB;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.sql.Date;
 import java.text.DecimalFormat;
+
+import java.text.NumberFormat;
+import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,11 +55,18 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
     private ArrayList<SanPham> listSanPham;
     private Map<SanPham, Integer> listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+
+    
+    
+	private KhachHang khThanhVien = new KhachHang(null);
+	private NhanVien nhanvienbanhang;
+    
+
     private final String username;
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
 
-    public EmployeeGUI(String username, String name){
+  public EmployeeGUI(String username, String name){
         super("Quản lí bán hàng");
         this.username = username;
 
@@ -518,6 +534,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
+        	
         	Map.Entry<String, Integer> entry = nhapMaThanhVien().entrySet().iterator().next();
         	// map.entry là 1 interface đại diện cho 1 cặp giá trị key-value
         	 txtHangThanhVien.setText(entry.getKey());
@@ -528,19 +545,42 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             choosePaymentMethod();
         }
         else if(o == btnXuatHoaDonTam){
-        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
-        	    SanPham key = entry.getKey();
-        	    Integer value = entry.getValue();
-        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
+//        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+//        	    SanPham key = entry.getKey();
+//        	    Integer value = entry.getValue();
+//        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
+//        	}
+//        	nhanvienbanhang = new NhanVien(username);
+//        	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
+//        	System.out.println(hd);
+//        	HoaDon_DAO hd_dao = new HoaDon_DAO();
+//        	hd_dao.create(hd);
+//        	hd_dao.createCTHoaDon(hd);
+//        	khThanhVien = null;
+//        	hd=null;
+        	String tt = txtTongThanhTien.getText().toLowerCase().replace("vnd", "").trim();
+        	tt = tt.replace(",", "");
+        	double tongtien = Double.parseDouble(tt);
+        	double tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
+        	new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
+        	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+        	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+        	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
+        	        tblSanPhamHoaDon.setValueAt("", i, j); // or null if your table model supports null values
+        	    }
         	}
-        	System.out.println("Tong tien: " + txtTongThanhTien.getText());
+        	dtmSanPhamHoaDon.setRowCount(0);
+        	txtTongThanhTien.setText("");
+        	txtGiamGia.setText("");
+        	txtTongTien.setText("");
         }
         else if(o == btnKetCa){
-            int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
-            if(option == JOptionPane.YES_OPTION){
-                this.dispose();
-                new LoginGUI();
-            }
+//            int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
+//            if(option == JOptionPane.YES_OPTION){
+//                this.dispose();
+//                new LoginGUI();
+//            }
+        
         }
     }
 
@@ -582,7 +622,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         txtTongTien.setText(moneyFormat.format(total) );
         giamGia = total/100 * Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
         txtGiamGia.setText(moneyFormat.format(giamGia));
-        txtTongThanhTien.setText(moneyFormat.format(total-giamGia)  );
+        txtTongThanhTien.setText(moneyFormat.format(total-giamGia));
         
     }
 
@@ -730,6 +770,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     	JTextField txtMaThanhVien = new JTextField(20);
     	
         JButton btnOk = new JButton("Xác nhận");
+       
         btnOk.setFont(fntMid);
         btnOk.setMaximumSize(new Dimension(200,50));
         btnOk.setMinimumSize(new Dimension(200,50));
@@ -753,6 +794,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnOk.addActionListener(e -> {
         	String makh = txtMaThanhVien.getText();
         	System.out.println(makh);
+        	khThanhVien = new KhachHang(makh);
         	KhachHang_DAO khdao = new KhachHang_DAO();
         	KhachHang kh = khdao.getKhachHang(makh);
         	

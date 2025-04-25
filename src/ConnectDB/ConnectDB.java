@@ -27,8 +27,8 @@ public class ConnectDB {
     }
     public void connect() {
         String url = "jdbc:sqlserver://localhost:1433;DatabaseName=CHTL;encrypt=true;trustServerCertificate=true;";
-        String user = "sa";
-        String pwd = "sapassword";
+        String user = "sa1";
+        String pwd = "password";
         try {
             con = DriverManager.getConnection(url,user,pwd);
         }catch (SQLException e) {
