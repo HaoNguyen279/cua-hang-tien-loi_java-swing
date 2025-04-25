@@ -18,7 +18,7 @@ import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.NumberFormatter;
+
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -26,7 +26,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,29 +37,24 @@ import java.util.Map;
  * @version:    1.0
  */
 public class EmployeeGUI extends JFrame implements ActionListener , MouseListener {
-    private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham, lblHangThanhVien, lblPhanTramGiam,lblHinhThucThanhToan;
+    private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham, lblHangThanhVien, lblPhanTramGiam,lblHinhThucThanhToan,
+    lblTongTien,lblGiamGia,lblTongThanhTien;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
     private JButton btnThemSanPham, btnXoaSanPham, btnTimSanPham,
             btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
-
     private ArrayList<SanPham> listSanPham;
     private Map<SanPham, Integer> listSanPhamHoaDon = new HashMap<SanPham, Integer>();
-    
-    private String username;
-    private Font fntMid = new Font("Roboto", Font.PLAIN, 18);
-    
+    private final String username;
+    private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
+    // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
+
     public EmployeeGUI(String username, String name){
         super("Quản lí bán hàng");
         this.username = username;
 
-        lblMaNhanVien = new JLabel("userid: " + username);
-        lblTenNhanVien = new JLabel("name: "+ name);
-        lblMaNhanVien.setFont(fntMid);
-
-
-        // table 1
+        // Khởi tạo JTable chứa các sản phẩm trong hóa đơn hiện tại
         String[] cols = {"Mã sản phẩm" , "Tên sản phẩm" , "Loại sản phẩm","Số luợng", "Đơn giá"};
         dtmSanPhamHoaDon = new DefaultTableModel(cols,0){
             @Override
@@ -76,13 +70,14 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         JTextField txtCellTextField = new JTextField(); // Temporary component
         txtCellTextField.setFont(fntMid);
-        DefaultCellEditor cellEditor = new DefaultCellEditor(txtCellTextField); // tạo 1 jtextfield tạm thời khi click vào cell
-
+        DefaultCellEditor cellEditor = new DefaultCellEditor(txtCellTextField); // Tạo 1 jtextfield tạm thời khi click vào cell
         tblSanPhamHoaDon.setDefaultEditor(Object.class,cellEditor);
-
 
         // Set up sự kiện khi người dùng thay đổi giá trị của ô ( số lượng )
         DefaultCellEditor editor = (DefaultCellEditor) tblSanPhamHoaDon.getDefaultEditor(Object.class);
+        // DefaultCellEditor là 1 class dùng để xử lý chỉnh sửa data cell của JTable
+        // (DefaultCellEditor) ép kiểu (casting) do getDefaultEditor của JTable return TableCellEditor
+
         editor.addCellEditorListener(new CellEditorListener() { // Lắng nghe sự kiện tại các cell của table
             @Override
             public void editingStopped(ChangeEvent e) {
@@ -92,10 +87,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 Object value = tblSanPhamHoaDon.getValueAt(row, col);
                 System.out.println("Người dùng vừa nhập xong ô tại [" + row + "," + col + "] với giá trị: " + value);
                 try {
-					int soLuongCheck = Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString());
+					Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString());
 				} catch (Exception e2) {
 					// TODO: handle exception
-					System.out.println("cmmm sai r");
+					System.out.println("Nhập sai định dạng số!");
 					tblSanPhamHoaDon.setValueAt(1, row, col);
 					updateSubTotal();
 					return;
@@ -115,15 +110,13 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                     }
                 }
             }
-
             @Override
             public void editingCanceled(ChangeEvent e) {
                 System.out.println("Hủy chỉnh sửa");
             }
         });
 
-        
-        // table 2
+        // Khởi tạo JTable chứa sản phẩm trong kho
         String[] cols2 = {"Mã sản phẩm" , "Tên sản phẩm" , "Loại sản phẩm", "Đơn giá", "SL Kho"};
         dtmSanPhamKho = new DefaultTableModel(cols2,0){
             @Override
@@ -136,15 +129,76 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         tblSanPhamKho.setFont(fntMid);
         tblSanPhamKho.getTableHeader().setFont(fntMid);
 
-        // Init JLabels
-        lblMaNhanVien = new JLabel("Mã nhân viên" );
+        // Khởi tạo JLabels
+        lblMaNhanVien = new JLabel("userid: " + username);
+        lblTenNhanVien = new JLabel("name: "+ name);
+        lblMaNhanVien.setFont(fntMid);
+        lblTenNhanVien.setFont(fntMid);
+
         lblMaSanPham = new JLabel("Nhập mã sản phẩm");
         lblMaSanPham.setFont(fntMid);
+
+        // JLabel phía bên trái
+        lblHangThanhVien  = new JLabel("Hạng thành viên");
+        lblPhanTramGiam = new JLabel("Phần trăm giảm");
+        lblHinhThucThanhToan = new JLabel("Hình thức thanh toán");
+        lblHangThanhVien.setFont(fntMid);
+        lblPhanTramGiam.setFont(fntMid);
+        lblHinhThucThanhToan.setFont(fntMid);
+        lblHangThanhVien.setPreferredSize(lblHinhThucThanhToan.getPreferredSize());
+        lblPhanTramGiam.setPreferredSize(lblHinhThucThanhToan.getPreferredSize());
+        // JLabel phía bên phải
+        lblTongTien = new JLabel("Tổng tiền");
+        lblGiamGia = new JLabel("Giảm giá");
+        lblTongThanhTien = new JLabel("Tổng thành tiền");
+        lblTongThanhTien.setFont(fntMid);
+        lblTongTien.setFont(fntMid);
+        lblGiamGia.setFont(fntMid);
+        lblTongTien.setPreferredSize(lblTongThanhTien.getPreferredSize());
+        lblGiamGia.setPreferredSize(lblTongThanhTien.getPreferredSize());
+
         txtMaSanPham = new JTextField(40);
         txtMaSanPham.setMaximumSize(new Dimension(txtMaSanPham.getWidth(), 50));
+        txtMaSanPham.setFont(fntMid);
 
+        // JTextField phía bên phải
+        txtTongTien = new JTextField(20);
+        txtGiamGia = new JTextField(20);
+        txtTongThanhTien = new JTextField(20);
+        txtTongThanhTien.setFont(fntMid);
+        txtGiamGia.setFont(fntMid);
+        txtTongTien.setFont(fntMid);
+        txtTongThanhTien.setBorder(BorderFactory.createEmptyBorder());
+        txtGiamGia.setBorder(BorderFactory.createEmptyBorder());
+        txtTongTien.setBorder(BorderFactory.createEmptyBorder());
+        txtTongThanhTien.setEditable(false);
+        txtGiamGia.setEditable(false);
+        txtTongTien.setEditable(false);
+        txtTongThanhTien.setHorizontalAlignment(SwingConstants.RIGHT);
+        txtGiamGia.setHorizontalAlignment(SwingConstants.RIGHT);
+        txtTongTien.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        // Init icon
+        // JTextField phía bên trái
+        txtHangThanhVien = new JTextField(20);
+        txtPhanTramGiam = new JTextField(20);
+        txtHinhThucThanhToan = new JTextField(20);
+        txtHangThanhVien.setFont(fntMid);
+        txtPhanTramGiam.setFont(fntMid);
+        txtHinhThucThanhToan.setFont(fntMid);
+        txtHangThanhVien.setBorder(BorderFactory.createEmptyBorder());
+        txtPhanTramGiam.setBorder(BorderFactory.createEmptyBorder());
+        txtHinhThucThanhToan.setBorder(BorderFactory.createEmptyBorder());
+        txtHangThanhVien.setEditable(false);
+        txtPhanTramGiam.setEditable(false);
+        txtHinhThucThanhToan.setEditable(false);
+        txtHangThanhVien.setText("Không");
+        txtPhanTramGiam.setText("0%");
+        txtHinhThucThanhToan.setText("Thanh toán bằng tiền mặt");
+        txtHangThanhVien.setHorizontalAlignment(SwingConstants.RIGHT);
+        txtPhanTramGiam.setHorizontalAlignment(SwingConstants.RIGHT);
+        txtHinhThucThanhToan.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        // Khởi tạo ImageIcon
         ImageIcon membership_icon = new ImageIcon("image/membership.png");
         ImageIcon pause_icon = new ImageIcon("image/pause.png");
         ImageIcon payment_icon = new ImageIcon("image/payment.png");
@@ -152,10 +206,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         ImageIcon exit_icon = new ImageIcon("image/exit.png");
         ImageIcon invoice_icon = new ImageIcon("image/invoice.png");
         
-        // Init JButtons
-        btnThemSanPham = new JButton("Thêm sản phẩm");
-        btnXoaSanPham = new JButton("Xóa sản phẩm");
-        btnTimSanPham = new JButton("Tìm sản phẩm");
+        // Khởi tạo JButtons
+        btnThemSanPham = new JButton("Thêm SP");
+        btnXoaSanPham = new JButton("Xóa SP");
+        btnTimSanPham = new JButton("Tìm SP");
         btnTheThanhVien = new JButton("Nhập mã thành viên");
         btnTamDungBan = new JButton("Tạm dừng bán");
         btnKieuThanhToan  = new JButton("Kiểu thanh toán");
@@ -163,7 +217,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnKetCa = new JButton("Kết ca");
         btnXuatHoaDon = new JButton("Xuất hóa đơn");
 
-        // ad icon
+        // Thêm icon cho các JButton
         btnTheThanhVien.setIcon(new ImageIcon(membership_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnTamDungBan.setIcon(new ImageIcon(pause_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKieuThanhToan.setIcon(new ImageIcon(payment_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
@@ -172,7 +226,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnXuatHoaDon.setIcon(new ImageIcon(invoice_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
 
 
-        // Add ActionListener for buttons
+        // Thêm ActionListener cho buttons
         btnThemSanPham.addActionListener(this);
         btnXoaSanPham.addActionListener(this);
         btnTimSanPham.addActionListener(this);
@@ -182,7 +236,8 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnXuatHoaDonTam.addActionListener(this);
         btnKetCa.addActionListener(this);
         btnXuatHoaDon.addActionListener(this);
-        
+
+        // Set font cho các JButton
         btnThemSanPham.setFont(fntMid);
         btnXoaSanPham.setFont(fntMid);
         btnTimSanPham.setFont(fntMid);
@@ -193,22 +248,40 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnKetCa.setFont(fntMid);
         btnXuatHoaDon.setFont(fntMid);
 
+        // Tắt focus vào title của JButton ( viền của chữ trong button )
         btnTheThanhVien.setFocusPainted(false);
         btnTamDungBan.setFocusPainted(false);
         btnKieuThanhToan.setFocusPainted(false);
         btnXuatHoaDonTam.setFocusPainted(false);
         btnKetCa.setFocusPainted(false);
         btnXuatHoaDon.setFocusPainted(false);
+        btnXoaSanPham.setFocusPainted(false);
+        btnTimSanPham.setFocusPainted(false);
+        btnThemSanPham.setFocusPainted(false);
 
-        btnTheThanhVien.setBackground(Color.RED);
-        btnTamDungBan.setBackground(Color.GREEN);
+        // Set lại màu cho các JButton
+        btnTheThanhVien.setBackground(Color.CYAN);
+        btnTamDungBan.setBackground(Color.CYAN);
         btnKieuThanhToan.setBackground(Color.CYAN);
         btnXuatHoaDonTam.setBackground(Color.CYAN);
         btnKetCa.setBackground(Color.CYAN);
         btnXuatHoaDon.setBackground(Color.CYAN);
+        btnXoaSanPham.setBackground(Color.RED);
+        btnThemSanPham.setBackground(Color.GREEN);
+        btnTimSanPham.setBackground(Color.CYAN);
 
+        // Set size 1 số JButton
+        setFixedSize(btnThemSanPham,150,50);
+        setFixedSize(btnTimSanPham,150,50);
+        setFixedSize(btnXoaSanPham,150,50);
+        setFixedSize(btnTheThanhVien,230,70);
+        setFixedSize(btnTamDungBan,230,70);
+        setFixedSize(btnKieuThanhToan,230,70);
+        setFixedSize(btnXuatHoaDonTam,230,70);
+        setFixedSize(btnKetCa,230,70);
+        setFixedSize(btnXuatHoaDon,230,70);
 
-        // Add MouseListener for tables
+        // Thêm MouseListener cho Table
         tblSanPhamHoaDon.addMouseListener(this);
         tblSanPhamKho.addMouseListener(this);
 
@@ -216,130 +289,52 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         Container container = this.getContentPane();
         container.setLayout(new GridBagLayout());
 
-        // Panel 1
+        // Khởi tạo JPanel chứa Jtable sản phẩm hóa đơn, tổng tiền
         JPanel table = new JPanel(new BorderLayout());
 
-        JPanel pnlThanhTien = new JPanel(new BorderLayout());
-        JPanel pnlGiamGia = new JPanel(new BorderLayout());
-        
-        
-        JPanel pnlRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel pnlRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel pnlRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlThanhTienDuoiJTbaleSp = new JPanel(new BorderLayout());
 
-        JLabel lblTongTien = new JLabel("Tổng tiền");
-        JLabel lblGiamGia = new JLabel("Giảm giá");
-        JLabel lblTongThanhTien = new JLabel("Tổng thành tiền");
-        lblTongThanhTien.setFont(fntMid);
-        lblTongTien.setFont(fntMid);
-        lblGiamGia.setFont(fntMid);
-        lblTongTien.setPreferredSize(lblTongThanhTien.getPreferredSize());
-        lblGiamGia.setPreferredSize(lblTongThanhTien.getPreferredSize());
+        JPanel pnlRightRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlRightRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlRightRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        txtTongTien = new JTextField(20);
-        txtGiamGia = new JTextField(20);
-        txtTongThanhTien = new JTextField(20);
+        pnlRightRow1.add(lblTongTien);
+        pnlRightRow1.add(txtTongTien);
+        pnlRightRow2.add(lblGiamGia);
+        pnlRightRow2.add(txtGiamGia);
+        pnlRightRow3.add(lblTongThanhTien);
+        pnlRightRow3.add(txtTongThanhTien);
 
-        txtTongThanhTien.setFont(fntMid);
-        txtGiamGia.setFont(fntMid);
-        txtTongTien.setFont(fntMid);
+        Box boxThanhTien = Box.createVerticalBox();
+        boxThanhTien.add(pnlRightRow1);
+        boxThanhTien.add(pnlRightRow2);
+        boxThanhTien.add(pnlRightRow3);
 
-        txtTongThanhTien.setBorder(BorderFactory.createEmptyBorder());
-        txtGiamGia.setBorder(BorderFactory.createEmptyBorder());
-        txtTongTien.setBorder(BorderFactory.createEmptyBorder());
-
-        txtTongThanhTien.setEditable(false);
-        txtGiamGia.setEditable(false);
-        txtTongTien.setEditable(false);
-
-        txtTongThanhTien.setHorizontalAlignment(SwingConstants.RIGHT);
-        txtGiamGia.setHorizontalAlignment(SwingConstants.RIGHT);
-        txtTongTien.setHorizontalAlignment(SwingConstants.RIGHT);
-
-
-        pnlRow1.add(lblTongTien);
-        pnlRow1.add(txtTongTien);
-
-        pnlRow2.add(lblGiamGia);
-        pnlRow2.add(txtGiamGia);
-
-        pnlRow3.add(lblTongThanhTien);
-        pnlRow3.add(txtTongThanhTien);
-        
-        
-        JPanel pnlGiamGiaThanhToan = new JPanel(new BorderLayout());
-        
         JPanel pnlLeftRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel pnlLeftRow2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel pnlLeftRow3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        
-        lblHangThanhVien  = new JLabel("Hạng thành viên");
-        lblPhanTramGiam = new JLabel("Phần trăm giảm");
-        lblHinhThucThanhToan = new JLabel("Hình thức thanh toán");
-        
-        lblHangThanhVien.setFont(fntMid);
-        lblPhanTramGiam.setFont(fntMid);
-        lblHinhThucThanhToan.setFont(fntMid);
-        lblHangThanhVien.setPreferredSize(lblHinhThucThanhToan.getPreferredSize());
-        lblPhanTramGiam.setPreferredSize(lblHinhThucThanhToan.getPreferredSize());
-        
-        
-        
-        
-        
-        txtHangThanhVien = new JTextField(20);
-        txtPhanTramGiam = new JTextField(20);
-        txtHinhThucThanhToan = new JTextField(20);
 
-        txtHangThanhVien.setFont(fntMid);
-        txtPhanTramGiam.setFont(fntMid);
-        txtHinhThucThanhToan.setFont(fntMid);
-
-        txtHangThanhVien.setBorder(BorderFactory.createEmptyBorder());
-        txtPhanTramGiam.setBorder(BorderFactory.createEmptyBorder());
-        txtHinhThucThanhToan.setBorder(BorderFactory.createEmptyBorder());
-
-        txtHangThanhVien.setEditable(false);
-        txtPhanTramGiam.setEditable(false);
-        txtHinhThucThanhToan.setEditable(false);
-        
-        txtHangThanhVien.setText("Không");
-        txtPhanTramGiam.setText("0%"); 	
-        txtHinhThucThanhToan.setText("Thanh toán bằng tiền mặt");
-
-        txtHangThanhVien.setHorizontalAlignment(SwingConstants.RIGHT);
-        txtPhanTramGiam.setHorizontalAlignment(SwingConstants.RIGHT);
-        txtHinhThucThanhToan.setHorizontalAlignment(SwingConstants.RIGHT);
-        
-        
         pnlLeftRow1.add(lblHangThanhVien);
         pnlLeftRow1.add(txtHangThanhVien);
-
         pnlLeftRow2.add(lblPhanTramGiam);
         pnlLeftRow2.add(txtPhanTramGiam);
-
         pnlLeftRow3.add(lblHinhThucThanhToan);
         pnlLeftRow3.add(txtHinhThucThanhToan);
-        
-        
-        Box boxGiamGia = Box.createVerticalBox();
-        boxGiamGia.add(pnlLeftRow1);
-        boxGiamGia.add(pnlLeftRow2);
-        boxGiamGia.add(pnlLeftRow3);
-        
 
-        Box boxThanhTien = Box.createVerticalBox();
-        boxThanhTien.add(pnlRow1);
-        boxThanhTien.add(pnlRow2);
-        boxThanhTien.add(pnlRow3);
+        Box boxThanhVien = Box.createVerticalBox();
+        boxThanhVien.add(pnlLeftRow1);
+        boxThanhVien.add(pnlLeftRow2);
+        boxThanhVien.add(pnlLeftRow3);
 
-        pnlThanhTien.add(boxThanhTien,BorderLayout.EAST);
-        pnlThanhTien.add(boxGiamGia,BorderLayout.WEST);
+
+        pnlThanhTienDuoiJTbaleSp.add(boxThanhTien,BorderLayout.EAST);
+        pnlThanhTienDuoiJTbaleSp.add(boxThanhVien,BorderLayout.WEST);
         
         JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
-        scrollPane.setPreferredSize(new Dimension(tblSanPhamHoaDon.getWidth(),600)); // ---- jackk
+
+
         table.add(scrollPane,BorderLayout.CENTER);
-        table.add(pnlThanhTien, BorderLayout.SOUTH);
+        table.add(pnlThanhTienDuoiJTbaleSp, BorderLayout.SOUTH);
 
 
         ////  PNL     TREN  PHAI
@@ -350,19 +345,11 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         Box boxButtonRightTop = Box.createVerticalBox();
 
-        setFixedSize(btnTheThanhVien);
-        setFixedSize(btnTamDungBan);
-        setFixedSize(btnKieuThanhToan);
-        setFixedSize(btnXuatHoaDonTam);
-        setFixedSize(btnKetCa);
-        setFixedSize(btnXuatHoaDon);
-
-
         boxButtonRightTop.add(btnTheThanhVien);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
-        boxButtonRightTop.add(btnTamDungBan);
-        boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnKieuThanhToan);
+        boxButtonRightTop.add(Box.createVerticalStrut(30));
+        boxButtonRightTop.add(btnTamDungBan);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnXuatHoaDonTam);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
@@ -374,33 +361,24 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         pnlUserInfo.add(lblMaNhanVien);
         pnlUserInfo.add(lblTenNhanVien);
 
-
         boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,30,0));
 
-        JPanel pnlWrapper = new JPanel(new GridBagLayout());
-        pnlWrapper.add(boxButtonRightTop);
-//        pnlWrapper.add(pnlUserInfo);
-
+        JPanel pnlWrapper = new JPanel();
+        JPanel pnlTemp = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        pnlTemp.add(boxButtonRightTop);
+        pnlWrapper.add(pnlTemp);
+//        pnlWrapper.add(pnlUserInfo, BorderLayout.SOUTH);
         table1.add(pnlWrapper);
+//        table1.add(pnlUserInfo);
 
 
         ////  PNL     DUOI       TRAI ------------------------------------------
 
-
         JPanel table2 = new JPanel(new BorderLayout());
         table2.setBackground(new Color(223, 220, 213));
 
-
         Box boxButton = Box.createVerticalBox();
-        btnThemSanPham.setMaximumSize(new Dimension(150,50));
-        btnTimSanPham.setMaximumSize(new Dimension(150,50));
-        btnXoaSanPham.setMaximumSize(new Dimension(150,50));
-        btnXoaSanPham.setFocusPainted(false);
-        btnTimSanPham.setFocusPainted(false);
-        btnThemSanPham.setFocusPainted(false);
-        btnXoaSanPham.setBackground(Color.RED);
-        btnThemSanPham.setBackground(Color.GREEN);
-        btnTimSanPham.setBackground(Color.CYAN);
+
         boxButton.add(btnThemSanPham);
         boxButton.add(Box.createVerticalStrut(30));
         boxButton.add(btnTimSanPham);
@@ -408,34 +386,24 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButton.add(btnXoaSanPham);
         boxButton.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
 
-
-        JPanel test69 = new JPanel(new BorderLayout());
+        JPanel pnlJtableSpKhoContainer = new JPanel(new BorderLayout());
 
         JScrollPane scrollPane2 = new JScrollPane(tblSanPhamKho);
-        scrollPane2.setPreferredSize(new Dimension(500, tblSanPhamKho.getRowHeight() * 4 + tblSanPhamKho.getTableHeader().getPreferredSize().height));
-        test69.add(scrollPane2,BorderLayout.CENTER);
+        scrollPane2.setPreferredSize(new Dimension(500, tblSanPhamKho.getRowHeight() * 4 ));
+
+        pnlJtableSpKhoContainer.add(scrollPane2,BorderLayout.CENTER);
 
         JPanel pnlContainerOfTxtMaSanPham = new JPanel();
-        
-        txtMaSanPham.setFont(fntMid);
+
         pnlContainerOfTxtMaSanPham.setBorder(BorderFactory.createEmptyBorder(0,0, 10,0));
         pnlContainerOfTxtMaSanPham.add(lblMaSanPham);
         pnlContainerOfTxtMaSanPham.add(txtMaSanPham);
 
-
         table2.add(pnlContainerOfTxtMaSanPham, BorderLayout.NORTH);
-        table2.add(test69, BorderLayout.CENTER); // test69 là center
+        table2.add(pnlJtableSpKhoContainer, BorderLayout.CENTER); // test69 là center
         table2.add(boxButton, BorderLayout.EAST);
 
 
-        // Panel xanh duong DUOI PHAI ___        END
-//        JPanel table3 = new JPanel(new BorderLayout());
-//
-//        table3.setBorder(BorderFactory.createEmptyBorder(50,100,0,100));
-//        JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
-//
-//        table3.add(pnlUserInfo, BorderLayout.SOUTH);
-//        table3.add(btnXuatHoaDon, BorderLayout.CENTER);
 
 
         // Panel xanh lá (3x2)
@@ -474,7 +442,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         ConnectDB.getInstance().connect();
         loadData_sanPham();
-//        setUndecorated(true);
 
         setMinimumSize(new Dimension(1600, 800));
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -576,7 +543,11 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             }
         }
     }
-    
+
+    /**
+     * Description : Cập nhật lại các Sản phẩm trong ArrayList hóa đơn tạm
+     * @param rowSelected
+     */
     private void updateHoaDon(int rowSelected) {
         String masp = tblSanPhamKho.getValueAt(rowSelected, 0).toString();
         int soLuong = 0;
@@ -594,6 +565,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             }
         }
     }
+
+    /**
+     * Description : Cập nhật giá trị của các JTextField thành tiền, giảm giá và tổng thành tiền
+     */
     private void updateSubTotal(){
         Double total = 0.0;
         Double soLuong = 0.0, donGia = 0.0,giamGia = 0.0;
@@ -611,16 +586,21 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         
     }
 
-    private void setFixedSize(JButton button) { // su dung gridbaglayout ko có tác dụng set size
+    /**
+     * Description : Chỉnh lại fixed size (size cố định cho JButton truyền vào function)
+     * @param button JButton, width int, height int
+     */
+    private void setFixedSize(JButton button,int width, int height) { // su dung gridbaglayout ko có tác dụng set size
         // nên tạo function set size cho button
-        int width = 230;
-        int height = 70;
         Dimension size = new Dimension(width, height);
         button.setPreferredSize(size);
         button.setMaximumSize(size);
         button.setMinimumSize(size);
     }
 
+    /**
+     * Description : Cập nhật list các sản phầm từ Database lên JTable chứa sản phẩm kho
+     */
     public void loadData_sanPham(){
         SanPham_DAO spDao = new SanPham_DAO();
         listSanPham = spDao.getListSanPham();
@@ -636,6 +616,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         }
     }
 
+    /**
+     * Description : Hiển thị 1 JDialog ngăn user tương tác với cửa sổ khác, trừ khi login chính xác account hiện tại
+     * @param username
+     */
     public void showLoginDialog(String username) {
         // custom lai layout cho dialog
         JTextField usernameField = new JTextField(10);
@@ -663,13 +647,13 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 null
         );
 
-        // custom lại dialog, dialog là dạng hộp thoại thông báo,xác nhận,....
+        // Custom lại dialog, dialog là dạng hộp thoại thông báo,xác nhận,....
         JDialog dialog = optionPane.createDialog("Đang tạm dừng bán - Vui lòng đăng nhập");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE); // nhấn nút X ko có j xảy ra - do nothing
-        // dùng dialog vì có thể thực hiện cái setDefaultCLoseOperation này, JPanel ko thể
+        // Dùng dialog vì có thể thực hiện cái setDefaultCLoseOperation này, JPanel ko thể
         dialog.setModal(true);
-        // modal là dạng dialog giống modal của web,
-        // chặn tương tác với các cửa sổ khác cho đến khi modal bị đóng
+        // SetModal là set dạng dialog giống modal của web,
+        // Chặn tương tác với các cửa sổ khác cho đến khi modal bị đóng
 
         okButton.addActionListener(e -> { // add actionlistener cho button ok
             String user = usernameField.getText();
@@ -694,6 +678,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         dialog.setVisible(true);
     }
+
+    /**
+     * Description : Hiển thị 1 JDialog để nhân viên chọn phương thức thanh toán
+     */
     public void choosePaymentMethod(){
         JComboBox<String> cboPaymentMethod = new JComboBox<String>();
         String[] paymentMethods = {"Thanh toán bằng tiền mặt", "Thanh toán bằng ngân hàng","Thanh toán bằng MOMO", "Thanh toán bằng VISA", "Thanh toán bằng Apple Pay"};
@@ -710,14 +698,11 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnOk.setMaximumSize(new Dimension(200,50));
         btnOk.setMinimumSize(new Dimension(200,50));
         btnOk.setAlignmentX(Component.CENTER_ALIGNMENT);
-//        btnOk.setBorder(BorderFactory.createEmptyBorder(50,50,50,50));
         Box pnlPaymentCustomPanel = Box.createVerticalBox();
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
         pnlPaymentCustomPanel.add(cboPaymentMethod);
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));
         pnlPaymentCustomPanel.add(btnOk);
-
-
 
         JOptionPane optionPane = new JOptionPane(
                 pnlPaymentCustomPanel, // component hiển thị trong dialog
@@ -732,16 +717,15 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         	String method = cboPaymentMethod.getSelectedItem().toString();
         	txtHinhThucThanhToan.setText(method);
         	dialog.dispose();
-        	
         });
         dialog.setVisible(true);
-
     }
-    
-    
-    
+
+    /**
+     * Description : Hiển thị JDialog để nhập mã thành viên, kiểm tra mã thành viên nhập vào
+     * @return : Map<String,Integer> thanhVien, bao gồm cặp key-value : (Hạng thành viên, Phần trăm giảm giá)
+     */
     public Map<String,Integer> nhapMaThanhVien(){
-    	
     	Map<String, Integer> thanhVien = new HashMap<String, Integer>();
     	JTextField txtMaThanhVien = new JTextField(20);
     	
@@ -774,27 +758,20 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         	
         	if(kh.getMaKhachHang() !=null) {
         		JOptionPane.showMessageDialog(this, " tìm thấy khác hàng!");
-        		int phanTramGiam = 0;
-        		switch(kh.getHangThanhVien()) {
-        			case "Kim Cương":
-        				phanTramGiam = 10;
-        				break;
-        			case "Vàng":
-        				phanTramGiam = 5;
-        				break;
-        		}
-        		thanhVien.put(kh.getHangThanhVien(), phanTramGiam);
+        		int phanTramGiam = switch (kh.getHangThanhVien()) {
+                    case "Kim Cương" -> 10;
+                    case "Vàng" -> 5;
+                    default -> 0;
+                };
+                thanhVien.put(kh.getHangThanhVien(), phanTramGiam);
         	}else {
         		JOptionPane.showMessageDialog(this, "Không tìm thấy khác hàng!");
         	}
         	dialog.dispose();
         });
-        
         dialog.setVisible(true);
-        
         return thanhVien;
     }
-
     @Override
     public void mouseClicked(MouseEvent e) {
 
