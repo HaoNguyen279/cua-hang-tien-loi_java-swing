@@ -130,7 +130,6 @@ public class KhachHang_DAO {
 	}
     
 	public boolean delete(String makh){
-		
 	    ConnectDB.getInstance();
 	    Connection con = ConnectDB.getConnection();
 	    PreparedStatement stmt = null;
@@ -145,7 +144,24 @@ public class KhachHang_DAO {
 		}
 	    return n>0;
 	}
-    	
+
+
+    public boolean updateDiemThanhVien(String makh){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n =0 ;
+        try {
+            stmt = con.prepareStatement("update KhachHang set DiemThanhVien=? WHERE MaKH = ?");
+            stmt.setInt(1,243);
+            stmt.setString(2,makh);
+            n = stmt.executeUpdate();
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return n>0;
+    }
     
     
     

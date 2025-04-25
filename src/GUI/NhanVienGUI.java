@@ -36,7 +36,7 @@ import java.util.Map;
  * @date:  4/21/2025
  * @version:    1.0
  */
-public class EmployeeGUI extends JFrame implements ActionListener , MouseListener {
+public class NhanVienGUI extends JFrame implements ActionListener , MouseListener {
     private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham, lblHangThanhVien, lblPhanTramGiam,lblHinhThucThanhToan,
     lblTongTien,lblGiamGia,lblTongThanhTien;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
@@ -50,7 +50,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
 
-    public EmployeeGUI(String username, String name){
+    public NhanVienGUI(String username, String name){
         super("Quản lí bán hàng");
         this.username = username;
 
@@ -137,6 +137,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         lblMaSanPham = new JLabel("Nhập mã sản phẩm");
         lblMaSanPham.setFont(fntMid);
+
 
         // JLabel phía bên trái
         lblHangThanhVien  = new JLabel("Hạng thành viên");
@@ -326,21 +327,17 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxThanhVien.add(pnlLeftRow2);
         boxThanhVien.add(pnlLeftRow3);
 
-
         pnlThanhTienDuoiJTbaleSp.add(boxThanhTien,BorderLayout.EAST);
         pnlThanhTienDuoiJTbaleSp.add(boxThanhVien,BorderLayout.WEST);
         
         JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
 
-
         table.add(scrollPane,BorderLayout.CENTER);
         table.add(pnlThanhTienDuoiJTbaleSp, BorderLayout.SOUTH);
-
-
         ////  PNL     TREN  PHAI
 
 
-        JPanel table1 = new JPanel(new GridLayout(1,1)); // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
+        JPanel table1 = new JPanel(new BorderLayout()); // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
         table1.setBackground(Color.YELLOW);
 
         Box boxButtonRightTop = Box.createVerticalBox();
@@ -356,21 +353,20 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButtonRightTop.add(btnKetCa);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnXuatHoaDon);
+        boxButtonRightTop.add(Box.createVerticalStrut(120));
 
         JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pnlUserInfo.add(lblMaNhanVien);
         pnlUserInfo.add(lblTenNhanVien);
 
-        boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,30,0));
+        boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,0,0));
 
         JPanel pnlWrapper = new JPanel();
         JPanel pnlTemp = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pnlTemp.add(boxButtonRightTop);
         pnlWrapper.add(pnlTemp);
-//        pnlWrapper.add(pnlUserInfo, BorderLayout.SOUTH);
-        table1.add(pnlWrapper);
-//        table1.add(pnlUserInfo);
-
+        table1.add(pnlWrapper, BorderLayout.CENTER);
+        table1.add(pnlUserInfo, BorderLayout.SOUTH);
 
         ////  PNL     DUOI       TRAI ------------------------------------------
 
@@ -452,7 +448,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     public static void main(String[] args) {
-        new EmployeeGUI(null,null);
+        new NhanVienGUI(null,null);
     }
 
     @Override
@@ -518,6 +514,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
+
         	Map.Entry<String, Integer> entry = nhapMaThanhVien().entrySet().iterator().next();
         	// map.entry là 1 interface đại diện cho 1 cặp giá trị key-value
         	 txtHangThanhVien.setText(entry.getKey());
@@ -541,6 +538,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 this.dispose();
                 new LoginGUI();
             }
+        } else if (o == btnXuatHoaDon) {
+            KhachHang_DAO khdao = new KhachHang_DAO();
+//            khdao.updateDiemThanhVien()
         }
     }
 

@@ -7,7 +7,6 @@
 package DAO;
 
 import Entity.NhanVien;
-import Entity.TaiKhoan;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -15,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 import ConnectDB.ConnectDB;
@@ -26,10 +24,10 @@ import ConnectDB.ConnectDB;
  * @date:  4/21/2025
  * @version:    1.0
  */
-public class NhanVien_Dao {
+public class NhanVien_DAO {
     ArrayList<NhanVien> dsnv;
     NhanVien nv;
-    public NhanVien_Dao(){
+    public NhanVien_DAO(){
         dsnv = new ArrayList<NhanVien>();
         nv = new NhanVien();
     }

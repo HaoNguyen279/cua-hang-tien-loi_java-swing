@@ -149,24 +149,5 @@ public class HoaDon_DAO {
 					}
 		            return n>0;
 		}
-		public static void main(String[] args) {
-			ConnectDB.getInstance().connect();
-			HoaDon_DAO dao = new HoaDon_DAO();
-			
-			 SanPham sp1 = new SanPham("B403", "Chuột", "Thiết bị", "Logitech",null , null, 100, 150000);
-		        SanPham sp2 = new SanPham("K501", "Bàn phím", "Thiết bị", "Razer",null, null, 50, 500000);
-		        Map<SanPham, Integer> gioHang = new HashMap<>();
-		        gioHang.put(sp1, 2);
-		        gioHang.put(sp2, 1);
-		        NhanVien nv = new NhanVien("nv1023");
-		        KhachHang kh = new KhachHang(null);
-		        	
-		        HoaDon hoaDon = new HoaDon(null, kh, nv, gioHang, null);
-		        hoaDon.setSanPhamList(gioHang);
-		        dao.create(hoaDon);
-		        if(dao.createCTHoaDon(hoaDon)) {
-		    	System.out.println("yes");
-		      }
-		    }
-		}
+}
 		

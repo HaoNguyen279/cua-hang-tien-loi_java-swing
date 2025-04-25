@@ -1,7 +1,7 @@
 package GUI;
 
 import ConnectDB.ConnectDB;
-import DAO.NhanVien_Dao;
+import DAO.NhanVien_DAO;
 import DAO.TaiKhoan_DAO;
 import Entity.NhanVien;
 import Entity.TaiKhoan;
@@ -10,10 +10,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -157,7 +153,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 			ArrayList<TaiKhoan> tklist = new ArrayList<TaiKhoan>();
 			tklist=tk_dao.getListTaiKhoan();
 			//lay ten nhan vien
-			NhanVien_Dao nv_dao = new NhanVien_Dao();
+			NhanVien_DAO nv_dao = new NhanVien_DAO();
 			
 			for(TaiKhoan tk : tklist) {
 				if(tk.getUsername().equals(user)&&tk.getPassword().equals(pwd)) {
@@ -166,7 +162,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 						//lay ten nhan vien
 						
 						NhanVien nv = nv_dao.getNhanVien(user);
-						new EmployeeGUI(user,nv.getTenNhanVien());
+						new NhanVienGUI(user,nv.getTenNhanVien());
 						return;
 					}
 					else {
