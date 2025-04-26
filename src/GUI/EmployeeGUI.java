@@ -6,11 +6,12 @@
 
 package GUI;
 
-import ConnectDB.ConnectDB;
+
 import DAO.KhachHang_DAO;
 import DAO.SanPham_DAO;
 import DAO.TaiKhoan_DAO;
 import Entity.KhachHang;
+import Entity.NhanVien;
 import Entity.SanPham;
 import Entity.TaiKhoan;
 
@@ -19,6 +20,7 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
+import ConnectDB.ConnectDB;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -26,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +39,7 @@ import java.util.Map;
  * @date:  4/21/2025
  * @version:    1.0
  */
-public class NhanVienGUI extends JFrame implements ActionListener , MouseListener {
+public class EmployeeGUI extends JFrame implements ActionListener , MouseListener {
     private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham, lblHangThanhVien, lblPhanTramGiam,lblHinhThucThanhToan,
     lblTongTien,lblGiamGia,lblTongThanhTien;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
@@ -46,11 +49,20 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
     private ArrayList<SanPham> listSanPham;
     private Map<SanPham, Integer> listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+
+    
+    
+	private KhachHang khThanhVien = new KhachHang(null);
+	private NhanVien nhanvienbanhang;
+    
+
     private final String username;
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
 
-    public NhanVienGUI(String username, String name){
+
+    public EmployeeGUI(String username, String name){
+
         super("Quản lí bán hàng");
         this.username = username;
 
@@ -448,7 +460,7 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
     }
 
     public static void main(String[] args) {
-        new NhanVienGUI(null,null);
+        new EmployeeGUI(null,null);
     }
 
     @Override
@@ -514,7 +526,6 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
             showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
-
         	Map.Entry<String, Integer> entry = nhapMaThanhVien().entrySet().iterator().next();
         	// map.entry là 1 interface đại diện cho 1 cặp giá trị key-value
         	 txtHangThanhVien.setText(entry.getKey());
@@ -525,14 +536,46 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
             choosePaymentMethod();
         }
         else if(o == btnXuatHoaDonTam){
-        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
-        	    SanPham key = entry.getKey();
-        	    Integer value = entry.getValue();
-        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
+//        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+//        	    SanPham key = entry.getKey();
+//        	    Integer value = entry.getValue();
+//        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
+//        	}
+//        	nhanvienbanhang = new NhanVien(username);
+//        	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
+//        	System.out.println(hd);
+//        	HoaDon_DAO hd_dao = new HoaDon_DAO();
+//        	hd_dao.create(hd);
+//        	hd_dao.createCTHoaDon(hd);
+//        	khThanhVien = null;
+//        	hd=null;
+
+        	String tt = txtTongThanhTien.getText().toLowerCase().replace("vnd", "").trim();
+        	tt = tt.replace(",", "");
+        	double tongtien = Double.parseDouble(tt);
+            double tienKhach;
+            // Nếu trả tiền mặt thì cần nhập số tiền Khách đưa để => tiền thối lại
+            if(txtHinhThucThanhToan.getText().equalsIgnoreCase("Thanh toán bằng tiền mặt")){
+                tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
+            }
+            // Nếu là chuyển khoản( hoặc các phương thức thanh toán khác tiền mặt thì tiền khách đưa = tổng tiền)
+            else{
+                tienKhach = tongtien;
+            }
+        	new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
+        	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+        	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+        	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
+        	        tblSanPhamHoaDon.setValueAt("", i, j); // or null if your table model supports null values
+        	    }
         	}
-        	System.out.println("Tong tien: " + txtTongThanhTien.getText());
+        	dtmSanPhamHoaDon.setRowCount(0);
+        	txtTongThanhTien.setText("");
+        	txtGiamGia.setText("");
+        	txtTongTien.setText("");
         }
         else if(o == btnKetCa){
+
             int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
             if(option == JOptionPane.YES_OPTION){
                 this.dispose();
@@ -541,6 +584,8 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
         } else if (o == btnXuatHoaDon) {
             KhachHang_DAO khdao = new KhachHang_DAO();
 //            khdao.updateDiemThanhVien()
+
+
         }
     }
 
@@ -582,7 +627,7 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
         txtTongTien.setText(moneyFormat.format(total) );
         giamGia = total/100 * Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
         txtGiamGia.setText(moneyFormat.format(giamGia));
-        txtTongThanhTien.setText(moneyFormat.format(total-giamGia)  );
+        txtTongThanhTien.setText(moneyFormat.format(total-giamGia));
         
     }
 
@@ -727,22 +772,28 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
      */
     public Map<String,Integer> nhapMaThanhVien(){
     	Map<String, Integer> thanhVien = new HashMap<String, Integer>();
-    	JTextField txtMaThanhVien = new JTextField(20);
-    	
+    	JTextField txtMaKhachHang = new JTextField(20);
+        txtMaKhachHang.setFont(fntMid);
+    	JLabel lblNhapMaKhachHang = new JLabel("Nhập mã khách hàng:");
+        lblNhapMaKhachHang.setFont(fntMid);
         JButton btnOk = new JButton("Xác nhận");
+       
         btnOk.setFont(fntMid);
         btnOk.setMaximumSize(new Dimension(200,50));
         btnOk.setMinimumSize(new Dimension(200,50));
         btnOk.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        Box pnlPaymentCustomPanel = Box.createVerticalBox();
-        pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
-        pnlPaymentCustomPanel.add(txtMaThanhVien);
-        pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));
-        pnlPaymentCustomPanel.add(btnOk);
+        Box boxNhapMaKh = Box.createVerticalBox();
+        boxNhapMaKh.setAlignmentX(Box.LEFT_ALIGNMENT);
+//        boxNhapMaKh.add(Box.createVerticalStrut(10));
+        boxNhapMaKh.add(lblNhapMaKhachHang);
+        boxNhapMaKh.add(Box.createVerticalStrut(10));
+        boxNhapMaKh.add(txtMaKhachHang);
+        boxNhapMaKh.add(Box.createVerticalStrut(50));
+        boxNhapMaKh.add(btnOk);
 
         JOptionPane optionPane = new JOptionPane(
-                pnlPaymentCustomPanel, // component hiển thị trong dialog
+                boxNhapMaKh, // component hiển thị trong dialog
                 JOptionPane.PLAIN_MESSAGE, // loại thông báo, PLAIN là ko có biểu tượng thông báo
                 JOptionPane.DEFAULT_OPTION, // Kiểu lựa chọn mặc định, do tự custom lại nút nên set là DEFAULT
                 null, // icon cho JDialog
@@ -751,8 +802,9 @@ public class NhanVienGUI extends JFrame implements ActionListener , MouseListene
         );
         JDialog dialog = optionPane.createDialog("Nhập mã khách hàng");
         btnOk.addActionListener(e -> {
-        	String makh = txtMaThanhVien.getText();
+        	String makh = txtMaKhachHang.getText();
         	System.out.println(makh);
+        	khThanhVien = new KhachHang(makh);
         	KhachHang_DAO khdao = new KhachHang_DAO();
         	KhachHang kh = khdao.getKhachHang(makh);
         	

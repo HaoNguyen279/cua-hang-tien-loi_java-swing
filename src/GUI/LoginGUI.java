@@ -162,7 +162,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 						//lay ten nhan vien
 						
 						NhanVien nv = nv_dao.getNhanVien(user);
-						new NhanVienGUI(user,nv.getTenNhanVien());
+						new EmployeeGUI(user,nv.getTenNhanVien());
 						return;
 					}
 					else {
