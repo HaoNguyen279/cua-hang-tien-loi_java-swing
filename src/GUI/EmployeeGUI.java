@@ -50,7 +50,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     lblTongTien,lblGiamGia,lblTongThanhTien;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
     private JButton btnThemSanPham, btnXoaSanPham, btnTimSanPham,
-            btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
+            btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXemLaiHoaDon, btnKetCa, btnXuatHoaDon;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
     private ArrayList<SanPham> listSanPham;
@@ -64,7 +64,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
     private final String username;
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
+	private Map<SanPham, Integer> listSanPhamHoaDonCu = new HashMap<SanPham, Integer>();
+	private double tienKhachPre = 0;
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
+	private int phamTramGiam;
 
   public EmployeeGUI(String username, String name){
         super("Quản lí bán hàng");
@@ -229,7 +232,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien = new JButton("Nhập mã thành viên");
         btnTamDungBan = new JButton("Tạm dừng bán");
         btnKieuThanhToan  = new JButton("Kiểu thanh toán");
-        btnXuatHoaDonTam = new JButton("Xuất hóa đơn");
+        btnXemLaiHoaDon = new JButton("Xem lại hóa đơn");
         btnKetCa = new JButton("Kết ca");
         btnXuatHoaDon = new JButton("Xuất hóa đơn");
 
@@ -237,7 +240,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.setIcon(new ImageIcon(membership_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnTamDungBan.setIcon(new ImageIcon(pause_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKieuThanhToan.setIcon(new ImageIcon(payment_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
-        btnXuatHoaDonTam.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnXemLaiHoaDon.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKetCa.setIcon(new ImageIcon(exit_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnXuatHoaDon.setIcon(new ImageIcon(invoice_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
 
@@ -249,7 +252,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.addActionListener(this);
         btnTamDungBan.addActionListener(this);
         btnKieuThanhToan.addActionListener(this);
-        btnXuatHoaDonTam.addActionListener(this);
+        btnXemLaiHoaDon.addActionListener(this);
         btnKetCa.addActionListener(this);
         btnXuatHoaDon.addActionListener(this);
 
@@ -260,7 +263,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.setFont(fntMid);
         btnTamDungBan.setFont(fntMid);
         btnKieuThanhToan.setFont(fntMid);
-        btnXuatHoaDonTam.setFont(fntMid);
+        btnXemLaiHoaDon.setFont(fntMid);
         btnKetCa.setFont(fntMid);
         btnXuatHoaDon.setFont(fntMid);
 
@@ -268,7 +271,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.setFocusPainted(false);
         btnTamDungBan.setFocusPainted(false);
         btnKieuThanhToan.setFocusPainted(false);
-        btnXuatHoaDonTam.setFocusPainted(false);
+        btnXemLaiHoaDon.setFocusPainted(false);
         btnKetCa.setFocusPainted(false);
         btnXuatHoaDon.setFocusPainted(false);
         btnXoaSanPham.setFocusPainted(false);
@@ -279,7 +282,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.setBackground(Color.CYAN);
         btnTamDungBan.setBackground(Color.CYAN);
         btnKieuThanhToan.setBackground(Color.CYAN);
-        btnXuatHoaDonTam.setBackground(Color.CYAN);
+        btnXemLaiHoaDon.setBackground(Color.CYAN);
         btnKetCa.setBackground(Color.CYAN);
         btnXuatHoaDon.setBackground(Color.CYAN);
         btnXoaSanPham.setBackground(Color.RED);
@@ -293,7 +296,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         setFixedSize(btnTheThanhVien,230,70);
         setFixedSize(btnTamDungBan,230,70);
         setFixedSize(btnKieuThanhToan,230,70);
-        setFixedSize(btnXuatHoaDonTam,230,70);
+        setFixedSize(btnXemLaiHoaDon,230,70);
         setFixedSize(btnKetCa,230,70);
         setFixedSize(btnXuatHoaDon,230,70);
 
@@ -367,7 +370,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnTamDungBan);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
-        boxButtonRightTop.add(btnXuatHoaDonTam);
+        boxButtonRightTop.add(btnXemLaiHoaDon);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnKetCa);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
@@ -471,6 +474,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         new EmployeeGUI(null,null);
     }
 
+    /**
+     *
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
@@ -544,36 +550,57 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         else if(o == btnKieuThanhToan){
             choosePaymentMethod();
         }
-        else if(o == btnXuatHoaDonTam){
-//        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
-//        	    SanPham key = entry.getKey();
-//        	    Integer value = entry.getValue();
-//        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
-//        	}
-//        	nhanvienbanhang = new NhanVien(username);
-//        	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
-//        	System.out.println(hd);
-//        	HoaDon_DAO hd_dao = new HoaDon_DAO();
-//        	hd_dao.create(hd);
-//        	hd_dao.createCTHoaDon(hd);
-//        	khThanhVien = null;
-//        	hd=null;
+        else if(o == btnXuatHoaDon){
+        	
         	String tt = txtTongThanhTien.getText().toLowerCase().replace("vnd", "").trim();
         	tt = tt.replace(",", "");
         	double tongtien = Double.parseDouble(tt);
         	double tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
-        	new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
-        	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
-        	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
-        	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
-        	        tblSanPhamHoaDon.setValueAt("", i, j); // or null if your table model supports null values
-        	    }
+        	if(tienKhach>0) {
+        		//update sl san pham
+        		SanPham_DAO sp_dao = new SanPham_DAO();
+            	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+            	    SanPham key = entry.getKey();
+            	    Integer value = entry.getValue();
+            	    key.setSoLuongKho(key.getSoLuongKho()-value);
+            	    sp_dao.update(key);
+            	}
+            	//ghi hoa don len csdls
+            	nhanvienbanhang = new NhanVien(username);
+            	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
+            	System.out.println(hd);
+            	HoaDon_DAO hd_dao = new HoaDon_DAO();
+            	hd_dao.create(hd);
+            	hd_dao.createCTHoaDon(hd);
+            	//tao hoa don 
+        		new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
+        		listSanPhamHoaDonCu = listSanPhamHoaDon;
+        		tienKhachPre = tienKhach;
+        		phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
+            	//reset
+            	khThanhVien = new KhachHang(null);
+            	hd=null;
+            	
+            	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+            	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+            	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
+            	        tblSanPhamHoaDon.setValueAt("", i, j); 
+            	    }
+            	}
+            	dtmSanPhamHoaDon.setRowCount(0);
+            	txtTongThanhTien.setText("");
+            	txtGiamGia.setText("");
+            	txtTongTien.setText("");
+            	loadData_sanPham();
         	}
-        	dtmSanPhamHoaDon.setRowCount(0);
-        	txtTongThanhTien.setText("");
-        	txtGiamGia.setText("");
-        	txtTongTien.setText("");
-        }
+        	else {
+        		JOptionPane.showMessageDialog(this, 
+                        "Đã hủy thanh toán!", 
+                        "Thông báo", JOptionPane.WARNING_MESSAGE);
+                }
+        	}
+        	
+        
         else if(o == btnKetCa){
 //            int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
 //            if(option == JOptionPane.YES_OPTION){
@@ -582,7 +609,20 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 //            }
         
         }
-    }
+        else if(o == btnXemLaiHoaDon) {
+        	if(tienKhachPre == 0) {
+        		JOptionPane.showMessageDialog(this, 
+                        "Chưa có hóa đơn nào trong ca", 
+                        "Thông báo", JOptionPane.WARNING_MESSAGE);
+                }
+        	else {
+            	new HoaDonDialog(listSanPhamHoaDonCu,tienKhachPre,phamTramGiam).hienThiHoaDon();
+            }
+        }
+        
+    }  	
+ 
+
 
     /**
      * Description : Cập nhật lại các Sản phẩm trong ArrayList hóa đơn tạm
@@ -642,6 +682,12 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
      * Description : Cập nhật list các sản phầm từ Database lên JTable chứa sản phẩm kho
      */
     public void loadData_sanPham(){
+    	for (int i = 0; i < tblSanPhamKho.getRowCount(); i++) {
+    	    for (int j = 0; j < tblSanPhamKho.getColumnCount(); j++) {
+    	        tblSanPhamKho.setValueAt("", i, j); 
+    	    }
+    	}
+    	dtmSanPhamKho.setRowCount(0);
         SanPham_DAO spDao = new SanPham_DAO();
         listSanPham = spDao.getListSanPham();
         for (SanPham sanPham : listSanPham) {

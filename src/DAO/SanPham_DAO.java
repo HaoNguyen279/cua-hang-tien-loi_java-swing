@@ -7,10 +7,13 @@
 package DAO;
 
 import ConnectDB.ConnectDB;
+import Entity.KhachHang;
 import Entity.SanPham;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,12 +45,12 @@ public class SanPham_DAO {
                 String tenSp = rs.getString(2);
                 String loaiSp = rs.getString(3);
                 String nhaCungCap = rs.getString(4);
-                LocalDate ngaySx = rs.getDate(5).toLocalDate();
-                LocalDate hanSd = rs.getDate(6).toLocalDate();
+                java.sql.Date ngaySx = rs.getDate(5);
+                java.sql.Date hanSd = rs.getDate(6);
                 int soLuongKho = rs.getInt(7);
-                Double donGia = rs.getDouble(8);
+                double donGia = rs.getDouble(8);
 
-                SanPham sp = new SanPham(maSp,tenSp,loaiSp, nhaCungCap,ngaySx,hanSd,soLuongKho,donGia);
+                SanPham sp = new SanPham(maSp, tenSp, loaiSp, nhaCungCap, ngaySx, hanSd, soLuongKho, donGia);
                 listSanPham.add(sp);
 
             }
@@ -59,15 +62,27 @@ public class SanPham_DAO {
     }
 
     public boolean update(SanPham sp){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n =0 ;
         try {
-            ConnectDB.getInstance();
-            Connection con = ConnectDB.getConnection();
-            Statement statement = con.createStatement();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-        return true;
+        	stmt = con.prepareStatement("update SanPham set TenSP=?,LoaiSP=?,NhaCC=? ,NgaySX=?,HanSD=?,SoLuongKho=?,DonGia=? "
+        			+ "where MaSP=?");
+        	stmt.setString(1, sp.getTenSanPham());
+        	stmt.setString(2,sp.getLoaiSanPham());
+        	stmt.setString(3,sp.getNhaCungCap());
+        	stmt.setDate(4, sp.getNgaySanXuat());
+        	stmt.setDate(5,sp.getHanSuDung());
+        	stmt.setInt(6, sp.getSoLuongKho());
+        	stmt.setDouble(7, sp.getDonGia());
+        	stmt.setString(8, sp.getMaSanPham());
+        	n = stmt.executeUpdate();
+        }catch (SQLException e) {
+			e.printStackTrace();
+		}
+   
+        return n>0;	
     }
 
     public boolean create(SanPham sp){
