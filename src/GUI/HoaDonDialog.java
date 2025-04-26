@@ -17,6 +17,7 @@ import javax.swing.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+import DAO.HoaDon_DAO;
 import Entity.SanPham;
 
 import java.awt.*;
@@ -71,7 +72,11 @@ public class HoaDonDialog extends JDialog {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String ngayHienTai = dateFormat.format(new Date());
-
+        //set mahoadon
+        
+        HoaDon_DAO hd_dao = new HoaDon_DAO();
+    	maHoaDon = hd_dao.getMaHD();
+        
         lblNgayInHoaDon = new JLabel("Ngày in: "  + ngayHienTai, JLabel.RIGHT);
         lblMaHoaDon = new JLabel("Mã hóa đơn: " + maHoaDon, JLabel.RIGHT);
         lblMaHoaDon.setBorder(BorderFactory.createEmptyBorder(0,0,0,40));
@@ -181,18 +186,13 @@ public class HoaDonDialog extends JDialog {
         // Thêm dữ liệu mẫu vào bảng
     	for (Map.Entry<SanPham, Integer> entry : listsp.entrySet()) {
     	    SanPham key = entry.getKey();
-    	    Integer value = entry.getValue();
-//    	    double soLuong = Double.parseDouble(Integer.toString(value));
-//            double donGia = Double.parseDouble(Double.toString(key.getDonGia()));
-//            double thanhTien = soLuong * donGia;
-//    	    System.out.println(soLuong);
-//    	    System.out.println(donGia);
-//            System.out.println(thanhTien);
-            
+    	    Integer value = entry.getValue();  
     	    System.out.println("Mã: " + key + ", Số lượng: " + value);
     	    String[] rowdata = { key.getMaSanPham(), key.getTenSanPham(), Integer.toString(value), Double.toString(key.getDonGia())};
     	    modelSanPham.addRow(rowdata);
     	}
+
+    	
     	
     }
         

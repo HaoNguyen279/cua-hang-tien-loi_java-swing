@@ -1,5 +1,6 @@
 package Entity;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -8,18 +9,18 @@ public class SanPham {
 	private String tenSanPham;
 	private String loaiSanPham;
 	private String nhaCungCap;
-	private LocalDate ngaySanXuat;
-	private LocalDate hanSuDung;
+	private Date ngaySanXuat;
+	private Date hanSuDung;
 	private int soLuongKho;
 	private double donGia;
 
-	public SanPham(String maSanPham, String tenSanPham, String loaiSanPham, String nhaCungCap, LocalDate ngaySanXuat, LocalDate hanSuDung, int soLuongKho, double donGia) {
+	public SanPham(String maSanPham, String tenSanPham, String loaiSanPham, String nhaCungCap, Date ngaySx, Date hanSd, int soLuongKho, double donGia) {
 		this.maSanPham = maSanPham;
 		this.tenSanPham = tenSanPham;
 		this.loaiSanPham = loaiSanPham;
 		this.nhaCungCap = nhaCungCap;
-		this.ngaySanXuat = ngaySanXuat;
-		this.hanSuDung = hanSuDung;
+		this.ngaySanXuat = ngaySx;
+		this.hanSuDung = hanSd;
 		this.soLuongKho = soLuongKho;
 		this.donGia = donGia;
 	}
@@ -73,11 +74,11 @@ public class SanPham {
 		return nhaCungCap;
 	}
 
-	public LocalDate getNgaySanXuat() {
+	public Date getNgaySanXuat() {
 		return ngaySanXuat;
 	}
 
-	public LocalDate getHanSuDung() {
+	public Date getHanSuDung() {
 		return hanSuDung;
 	}
 
@@ -105,11 +106,11 @@ public class SanPham {
 		this.nhaCungCap = nhaCungCap;
 	}
 
-	public void setNgaySanXuat(LocalDate ngaySanXuat) {
+	public void setNgaySanXuat(Date ngaySanXuat) {
 		this.ngaySanXuat = ngaySanXuat;
 	}
 
-	public void setHanSuDung(LocalDate hanSuDung) {
+	public void setHanSuDung(Date hanSuDung) {
 		this.hanSuDung = hanSuDung;
 	}
 

@@ -31,6 +31,7 @@ public class NhanVien_DAO {
         dsnv = new ArrayList<NhanVien>();
         nv = new NhanVien();
     }
+
     
     public ArrayList<NhanVien> getListNhanVien(){
         try {

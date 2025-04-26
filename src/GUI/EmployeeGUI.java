@@ -7,9 +7,11 @@
 package GUI;
 
 
+import DAO.HoaDon_DAO;
 import DAO.KhachHang_DAO;
 import DAO.SanPham_DAO;
 import DAO.TaiKhoan_DAO;
+import Entity.HoaDon;
 import Entity.KhachHang;
 import Entity.NhanVien;
 import Entity.SanPham;
@@ -27,7 +29,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.sql.Date;
 import java.text.DecimalFormat;
+
+import java.text.NumberFormat;
+import java.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +50,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     lblTongTien,lblGiamGia,lblTongThanhTien;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
     private JButton btnThemSanPham, btnXoaSanPham, btnTimSanPham,
-            btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXuatHoaDonTam, btnKetCa, btnXuatHoaDon;
+            btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXemLaiHoaDon, btnKetCa, btnXuatHoaDon,btnTimTheoTenSanPham;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
     private ArrayList<SanPham> listSanPham;
@@ -58,11 +64,12 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
     private final String username;
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
+	private Map<SanPham, Integer> listSanPhamHoaDonCu = new HashMap<SanPham, Integer>();
+	private double tienKhachPre = 0;
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
+	private int phamTramGiam;
 
-
-    public EmployeeGUI(String username, String name){
-
+  public EmployeeGUI(String username, String name){
         super("Quản lí bán hàng");
         this.username = username;
 
@@ -95,9 +102,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             public void editingStopped(ChangeEvent e) {
                 int row = tblSanPhamHoaDon.getSelectedRow();
                 int col = tblSanPhamHoaDon.getSelectedColumn();
-                
                 Object value = tblSanPhamHoaDon.getValueAt(row, col);
+
                 System.out.println("Người dùng vừa nhập xong ô tại [" + row + "," + col + "] với giá trị: " + value);
+
                 try {
 					Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString());
 				} catch (Exception e2) {
@@ -107,17 +115,31 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 					updateSubTotal();
 					return;
 				}
+
+                String maSp = tblSanPhamHoaDon.getValueAt(row, 0).toString();
+                int soLuongHienTaiCuaSpTrongHoaDon = 0;
+                int soLuongNhanVienVuaNhap = Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString());
+                for(SanPham keySp : listSanPhamHoaDon.keySet()){ // map.keySet return a Set of key của map
+                    if(keySp.getMaSanPham().equalsIgnoreCase(maSp))
+                        soLuongHienTaiCuaSpTrongHoaDon = listSanPhamHoaDon.get(keySp);
+                }
+                int soLuongKhoCuaSanPham = listSanPham.stream()
+                        .filter(sp -> sp.getMaSanPham().equalsIgnoreCase(maSp))
+                        .map(SanPham::getSoLuongKho)
+                        .findFirst()
+                        .orElse(0);
+                if(soLuongKhoCuaSanPham < soLuongNhanVienVuaNhap ){
+                    JOptionPane.showMessageDialog(null,"Không đủ hàng!");
+                    tblSanPhamHoaDon.setValueAt(soLuongHienTaiCuaSpTrongHoaDon, row, col);
+                    return;
+                }
                 if(Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, col).toString()) <= 0) {
                 	tblSanPhamHoaDon.setValueAt(1, row, col);
                 }
                 updateSubTotal();
-                
-                String masp = tblSanPhamHoaDon.getValueAt(row, 0).toString();
-                int soLuong = Integer.parseInt(tblSanPhamHoaDon.getValueAt(row, 3).toString());
-                
                 for (SanPham sp : listSanPham) {
-                    if (sp.getMaSanPham().equalsIgnoreCase(masp)) {
-                        listSanPhamHoaDon.put(sp, soLuong);
+                    if (sp.getMaSanPham().equalsIgnoreCase(maSp)) {
+                        listSanPhamHoaDon.put(sp, soLuongNhanVienVuaNhap);
                         break;
                     }
                 }
@@ -149,7 +171,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         lblMaSanPham = new JLabel("Nhập mã sản phẩm");
         lblMaSanPham.setFont(fntMid);
-
 
         // JLabel phía bên trái
         lblHangThanhVien  = new JLabel("Hạng thành viên");
@@ -222,19 +243,20 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         // Khởi tạo JButtons
         btnThemSanPham = new JButton("Thêm SP");
         btnXoaSanPham = new JButton("Xóa SP");
-        btnTimSanPham = new JButton("Tìm SP");
+        btnTimSanPham = new JButton("Tìm mã SP");
         btnTheThanhVien = new JButton("Nhập mã thành viên");
         btnTamDungBan = new JButton("Tạm dừng bán");
         btnKieuThanhToan  = new JButton("Kiểu thanh toán");
-        btnXuatHoaDonTam = new JButton("Xuất hóa đơn");
+        btnXemLaiHoaDon = new JButton("Xem lại hóa đơn");
         btnKetCa = new JButton("Kết ca");
         btnXuatHoaDon = new JButton("Xuất hóa đơn");
+        btnTimTheoTenSanPham = new JButton("Tìm tên SP");
 
         // Thêm icon cho các JButton
         btnTheThanhVien.setIcon(new ImageIcon(membership_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnTamDungBan.setIcon(new ImageIcon(pause_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKieuThanhToan.setIcon(new ImageIcon(payment_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
-        btnXuatHoaDonTam.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
+        btnXemLaiHoaDon.setIcon(new ImageIcon(bill_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnKetCa.setIcon(new ImageIcon(exit_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
         btnXuatHoaDon.setIcon(new ImageIcon(invoice_icon.getImage().getScaledInstance(24,24,Image.SCALE_SMOOTH)));
 
@@ -246,9 +268,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.addActionListener(this);
         btnTamDungBan.addActionListener(this);
         btnKieuThanhToan.addActionListener(this);
-        btnXuatHoaDonTam.addActionListener(this);
+        btnXemLaiHoaDon.addActionListener(this);
         btnKetCa.addActionListener(this);
         btnXuatHoaDon.addActionListener(this);
+        btnTimTheoTenSanPham.addActionListener(this);
 
         // Set font cho các JButton
         btnThemSanPham.setFont(fntMid);
@@ -257,40 +280,44 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnTheThanhVien.setFont(fntMid);
         btnTamDungBan.setFont(fntMid);
         btnKieuThanhToan.setFont(fntMid);
-        btnXuatHoaDonTam.setFont(fntMid);
+        btnXemLaiHoaDon.setFont(fntMid);
         btnKetCa.setFont(fntMid);
         btnXuatHoaDon.setFont(fntMid);
+        btnTimTheoTenSanPham.setFont(fntMid);
 
         // Tắt focus vào title của JButton ( viền của chữ trong button )
         btnTheThanhVien.setFocusPainted(false);
         btnTamDungBan.setFocusPainted(false);
         btnKieuThanhToan.setFocusPainted(false);
-        btnXuatHoaDonTam.setFocusPainted(false);
+        btnXemLaiHoaDon.setFocusPainted(false);
         btnKetCa.setFocusPainted(false);
         btnXuatHoaDon.setFocusPainted(false);
         btnXoaSanPham.setFocusPainted(false);
         btnTimSanPham.setFocusPainted(false);
         btnThemSanPham.setFocusPainted(false);
+        btnTimTheoTenSanPham.setFocusPainted(false);
 
         // Set lại màu cho các JButton
         btnTheThanhVien.setBackground(Color.CYAN);
         btnTamDungBan.setBackground(Color.CYAN);
         btnKieuThanhToan.setBackground(Color.CYAN);
-        btnXuatHoaDonTam.setBackground(Color.CYAN);
+        btnXemLaiHoaDon.setBackground(Color.CYAN);
         btnKetCa.setBackground(Color.CYAN);
         btnXuatHoaDon.setBackground(Color.CYAN);
         btnXoaSanPham.setBackground(Color.RED);
         btnThemSanPham.setBackground(Color.GREEN);
         btnTimSanPham.setBackground(Color.CYAN);
+        btnTimTheoTenSanPham.setBackground(Color.YELLOW);
 
         // Set size 1 số JButton
         setFixedSize(btnThemSanPham,150,50);
         setFixedSize(btnTimSanPham,150,50);
         setFixedSize(btnXoaSanPham,150,50);
+        setFixedSize(btnTimTheoTenSanPham,150,50);
         setFixedSize(btnTheThanhVien,230,70);
         setFixedSize(btnTamDungBan,230,70);
         setFixedSize(btnKieuThanhToan,230,70);
-        setFixedSize(btnXuatHoaDonTam,230,70);
+        setFixedSize(btnXemLaiHoaDon,230,70);
         setFixedSize(btnKetCa,230,70);
         setFixedSize(btnXuatHoaDon,230,70);
 
@@ -339,17 +366,21 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxThanhVien.add(pnlLeftRow2);
         boxThanhVien.add(pnlLeftRow3);
 
+
         pnlThanhTienDuoiJTbaleSp.add(boxThanhTien,BorderLayout.EAST);
         pnlThanhTienDuoiJTbaleSp.add(boxThanhVien,BorderLayout.WEST);
         
         JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
 
+
         table.add(scrollPane,BorderLayout.CENTER);
         table.add(pnlThanhTienDuoiJTbaleSp, BorderLayout.SOUTH);
+
+
         ////  PNL     TREN  PHAI
 
 
-        JPanel table1 = new JPanel(new BorderLayout()); // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
+        JPanel table1 = new JPanel(new GridLayout(1,1)); // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
         table1.setBackground(Color.YELLOW);
 
         Box boxButtonRightTop = Box.createVerticalBox();
@@ -360,25 +391,26 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnTamDungBan);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
-        boxButtonRightTop.add(btnXuatHoaDonTam);
+        boxButtonRightTop.add(btnXemLaiHoaDon);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnKetCa);
         boxButtonRightTop.add(Box.createVerticalStrut(30));
         boxButtonRightTop.add(btnXuatHoaDon);
-        boxButtonRightTop.add(Box.createVerticalStrut(120));
 
         JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pnlUserInfo.add(lblMaNhanVien);
         pnlUserInfo.add(lblTenNhanVien);
 
-        boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,0,0));
+        boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,30,0));
 
         JPanel pnlWrapper = new JPanel();
         JPanel pnlTemp = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pnlTemp.add(boxButtonRightTop);
         pnlWrapper.add(pnlTemp);
-        table1.add(pnlWrapper, BorderLayout.CENTER);
-        table1.add(pnlUserInfo, BorderLayout.SOUTH);
+//        pnlWrapper.add(pnlUserInfo, BorderLayout.SOUTH);
+        table1.add(pnlWrapper);
+//        table1.add(pnlUserInfo);
+
 
         ////  PNL     DUOI       TRAI ------------------------------------------
 
@@ -392,6 +424,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButton.add(btnTimSanPham);
         boxButton.add(Box.createVerticalStrut(30));
         boxButton.add(btnXoaSanPham);
+        boxButton.add(Box.createVerticalStrut(30));
+        boxButton.add(btnTimTheoTenSanPham);
+
         boxButton.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
 
         JPanel pnlJtableSpKhoContainer = new JPanel(new BorderLayout());
@@ -463,6 +498,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         new EmployeeGUI(null,null);
     }
 
+    /**
+     *
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
@@ -472,13 +510,29 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm từ table kho!");
                 return;
             }
+            try {
+                Integer.parseInt(tblSanPhamKho.getValueAt(rowSelected,4).toString());
+            }catch (Exception exception){
+                exception.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Sản phẩm chọn đã hết hàng!");
+                return;
+            }
             String maspthem = tblSanPhamKho.getValueAt(rowSelected, 0).toString();
+            int soLuongKhoCuaSanPham = listSanPham.stream()
+                    .filter(sp -> sp.getMaSanPham().equalsIgnoreCase(maspthem))
+                    .map(SanPham::getSoLuongKho)
+                    .findFirst()
+                    .orElse(0);
             boolean daTonTai = false;
 
             for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
                 if (tblSanPhamHoaDon.getValueAt(i, 0).toString().equalsIgnoreCase(maspthem)) {
                     // Tồn tại thì + 1
                     int soLuongCu = Integer.parseInt(tblSanPhamHoaDon.getValueAt(i, 3).toString());
+                    if(soLuongCu + 1 > soLuongKhoCuaSanPham){
+                        JOptionPane.showMessageDialog(this,"Không đủ hàng để thêm!");
+                        return;
+                    }
                     tblSanPhamHoaDon.setValueAt(soLuongCu + 1, i, 3);
                     daTonTai = true;
                     break; // out loop
@@ -509,6 +563,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                     return;
                 }
             }
+            timSanPhamTheoMa(true);
+        }
+        else if(o == btnTimTheoTenSanPham){
+            timSanPhamTheoMa(false);
         }
         else if(o == btnXoaSanPham){
             int rowSelected = tblSanPhamHoaDon.getSelectedRow();
@@ -526,6 +584,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
+        	
         	Map.Entry<String, Integer> entry = nhapMaThanhVien().entrySet().iterator().next();
         	// map.entry là 1 interface đại diện cho 1 cặp giá trị key-value
         	 txtHangThanhVien.setText(entry.getKey());
@@ -535,59 +594,73 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         else if(o == btnKieuThanhToan){
             choosePaymentMethod();
         }
-        else if(o == btnXuatHoaDonTam){
-//        	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
-//        	    SanPham key = entry.getKey();
-//        	    Integer value = entry.getValue();
-//        	    System.out.println("Mã: " + key + ", Số lượng: " + value);	
-//        	}
-//        	nhanvienbanhang = new NhanVien(username);
-//        	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
-//        	System.out.println(hd);
-//        	HoaDon_DAO hd_dao = new HoaDon_DAO();
-//        	hd_dao.create(hd);
-//        	hd_dao.createCTHoaDon(hd);
-//        	khThanhVien = null;
-//        	hd=null;
-
+        else if(o == btnXuatHoaDon){
         	String tt = txtTongThanhTien.getText().toLowerCase().replace("vnd", "").trim();
         	tt = tt.replace(",", "");
         	double tongtien = Double.parseDouble(tt);
-            double tienKhach;
-            // Nếu trả tiền mặt thì cần nhập số tiền Khách đưa để => tiền thối lại
-            if(txtHinhThucThanhToan.getText().equalsIgnoreCase("Thanh toán bằng tiền mặt")){
-                tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
-            }
-            // Nếu là chuyển khoản( hoặc các phương thức thanh toán khác tiền mặt thì tiền khách đưa = tổng tiền)
-            else{
-                tienKhach = tongtien;
-            }
-        	new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
-        	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
-        	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
-        	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
-        	        tblSanPhamHoaDon.setValueAt("", i, j); // or null if your table model supports null values
-        	    }
-        	}
-        	dtmSanPhamHoaDon.setRowCount(0);
-        	txtTongThanhTien.setText("");
-        	txtGiamGia.setText("");
-        	txtTongTien.setText("");
-        }
-        else if(o == btnKetCa){
+        	double tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
 
+        	if(tienKhach>0) {
+        		//update số lượng sản phẩm
+        		SanPham_DAO sp_dao = new SanPham_DAO();
+            	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+            	    SanPham key = entry.getKey();
+            	    Integer value = entry.getValue();
+            	    key.setSoLuongKho(key.getSoLuongKho()-value);
+            	    sp_dao.update(key);
+            	}
+            	//ghi hoa don len csdls
+            	nhanvienbanhang = new NhanVien(username);
+            	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
+            	System.out.println(hd);
+            	HoaDon_DAO hd_dao = new HoaDon_DAO();
+            	hd_dao.create(hd);
+            	hd_dao.createCTHoaDon(hd);
+            	//tao hoa don 
+        		new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
+        		listSanPhamHoaDonCu = listSanPhamHoaDon;
+        		tienKhachPre = tienKhach;
+        		phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
+            	//reset
+            	khThanhVien = new KhachHang(null);
+            	hd=null;
+            	
+            	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+            	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+            	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
+            	        tblSanPhamHoaDon.setValueAt("", i, j); 
+            	    }
+            	}
+            	dtmSanPhamHoaDon.setRowCount(0);
+            	txtTongThanhTien.setText("");
+            	txtGiamGia.setText("");
+            	txtTongTien.setText("");
+            	loadData_sanPham();
+        	}
+        	else {
+        		JOptionPane.showMessageDialog(this, 
+                        "Đã hủy thanh toán!", 
+                        "Thông báo", JOptionPane.WARNING_MESSAGE);
+                }
+        	}
+        else if(o == btnKetCa){
             int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
             if(option == JOptionPane.YES_OPTION){
                 this.dispose();
                 new LoginGUI();
             }
-        } else if (o == btnXuatHoaDon) {
-            KhachHang_DAO khdao = new KhachHang_DAO();
-//            khdao.updateDiemThanhVien()
-
-
         }
-    }
+        else if(o == btnXemLaiHoaDon) {
+        	if(tienKhachPre == 0) {
+        		JOptionPane.showMessageDialog(this, 
+                        "Chưa có hóa đơn nào trong ca", 
+                        "Thông báo", JOptionPane.WARNING_MESSAGE);
+                }
+        	else {
+            	new HoaDonDialog(listSanPhamHoaDonCu,tienKhachPre,phamTramGiam).hienThiHoaDon();
+            }
+        }
+    }  	
 
     /**
      * Description : Cập nhật lại các Sản phẩm trong ArrayList hóa đơn tạm
@@ -628,7 +701,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         giamGia = total/100 * Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
         txtGiamGia.setText(moneyFormat.format(giamGia));
         txtTongThanhTien.setText(moneyFormat.format(total-giamGia));
-        
     }
 
     /**
@@ -647,6 +719,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
      * Description : Cập nhật list các sản phầm từ Database lên JTable chứa sản phẩm kho
      */
     public void loadData_sanPham(){
+    	dtmSanPhamKho.setRowCount(0); // reset table
         SanPham_DAO spDao = new SanPham_DAO();
         listSanPham = spDao.getListSanPham();
         for (SanPham sanPham : listSanPham) {
@@ -655,7 +728,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                     sanPham.getTenSanPham(),
                     sanPham.getLoaiSanPham(),
                     sanPham.getDonGia(),
-                    sanPham.getSoLuongKho()
+                    sanPham.getSoLuongKho()  == 0 ? "Hết hàng" : sanPham.getSoLuongKho()
             };
             dtmSanPhamKho.addRow(rowData);
         }
@@ -772,10 +845,8 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
      */
     public Map<String,Integer> nhapMaThanhVien(){
     	Map<String, Integer> thanhVien = new HashMap<String, Integer>();
-    	JTextField txtMaKhachHang = new JTextField(20);
-        txtMaKhachHang.setFont(fntMid);
-    	JLabel lblNhapMaKhachHang = new JLabel("Nhập mã khách hàng:");
-        lblNhapMaKhachHang.setFont(fntMid);
+    	JTextField txtMaThanhVien = new JTextField(20);
+    	
         JButton btnOk = new JButton("Xác nhận");
        
         btnOk.setFont(fntMid);
@@ -783,17 +854,14 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnOk.setMinimumSize(new Dimension(200,50));
         btnOk.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        Box boxNhapMaKh = Box.createVerticalBox();
-        boxNhapMaKh.setAlignmentX(Box.LEFT_ALIGNMENT);
-//        boxNhapMaKh.add(Box.createVerticalStrut(10));
-        boxNhapMaKh.add(lblNhapMaKhachHang);
-        boxNhapMaKh.add(Box.createVerticalStrut(10));
-        boxNhapMaKh.add(txtMaKhachHang);
-        boxNhapMaKh.add(Box.createVerticalStrut(50));
-        boxNhapMaKh.add(btnOk);
+        Box pnlPaymentCustomPanel = Box.createVerticalBox();
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
+        pnlPaymentCustomPanel.add(txtMaThanhVien);
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));
+        pnlPaymentCustomPanel.add(btnOk);
 
         JOptionPane optionPane = new JOptionPane(
-                boxNhapMaKh, // component hiển thị trong dialog
+                pnlPaymentCustomPanel, // component hiển thị trong dialog
                 JOptionPane.PLAIN_MESSAGE, // loại thông báo, PLAIN là ko có biểu tượng thông báo
                 JOptionPane.DEFAULT_OPTION, // Kiểu lựa chọn mặc định, do tự custom lại nút nên set là DEFAULT
                 null, // icon cho JDialog
@@ -802,7 +870,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         );
         JDialog dialog = optionPane.createDialog("Nhập mã khách hàng");
         btnOk.addActionListener(e -> {
-        	String makh = txtMaKhachHang.getText();
+        	String makh = txtMaThanhVien.getText();
         	System.out.println(makh);
         	khThanhVien = new KhachHang(makh);
         	KhachHang_DAO khdao = new KhachHang_DAO();
@@ -824,6 +892,40 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         dialog.setVisible(true);
         return thanhVien;
     }
+
+    private void timSanPhamTheoMa(boolean loaiTim){ // true là tìm theo mã, false là tìm theo sản phẩm
+        String keyword = txtMaSanPham.getText();
+        ArrayList<SanPham> listSpTimDuoc = new ArrayList<>();
+        ArrayList<SanPham> listSpConLai = new ArrayList<>();
+        if(loaiTim){
+            for(SanPham sp : listSanPham){
+                if(sp.getMaSanPham().toLowerCase().contains(keyword.toLowerCase()))
+                    listSpTimDuoc.add(sp);
+                else
+                    listSpConLai.add(sp);
+            }
+        }
+        else{
+            for(SanPham sp : listSanPham){
+                if(sp.getTenSanPham().toLowerCase().contains(keyword.toLowerCase()))
+                    listSpTimDuoc.add(sp);
+                else
+                    listSpConLai.add(sp);
+            }
+        }
+
+        Object[] data = null;
+        dtmSanPhamKho.setRowCount(0); // Reset toan bo table
+        for (SanPham sp : listSpTimDuoc){
+            data = new Object[]{sp.getMaSanPham(), sp.getTenSanPham(), sp.getLoaiSanPham(), sp.getDonGia(), sp.getSoLuongKho()};
+            dtmSanPhamKho.addRow(data);
+        }
+        for (SanPham sp : listSpConLai){
+            data = new Object[]{sp.getMaSanPham(), sp.getTenSanPham(), sp.getLoaiSanPham(), sp.getDonGia(), sp.getSoLuongKho()};
+            dtmSanPhamKho.addRow(data);
+        }
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
 
