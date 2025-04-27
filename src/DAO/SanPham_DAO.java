@@ -8,6 +8,7 @@ package DAO;
 
 import ConnectDB.ConnectDB;
 import Entity.KhachHang;
+import Entity.NhaCungCap;
 import Entity.SanPham;
 
 import java.sql.Connection;
@@ -21,7 +22,7 @@ import java.util.Date;
 
 /*
  * @description: Data Access Object (DAO) của entity Sản phẩm
- * @author: Nguyễn Minh Hào
+ * @author: Nguyễn Minh Hào, Huỳnh Gia Mân
  * @date:  4/22/2025
  * @version:    1.0
  */
@@ -44,7 +45,7 @@ public class SanPham_DAO {
                 String maSp = rs.getString(1);
                 String tenSp = rs.getString(2);
                 String loaiSp = rs.getString(3);
-                String nhaCungCap = rs.getString(4);
+                NhaCungCap nhaCungCap = new NhaCungCap(rs.getString(4));
                 java.sql.Date ngaySx = rs.getDate(5);
                 java.sql.Date hanSd = rs.getDate(6);
                 int soLuongKho = rs.getInt(7);
@@ -71,7 +72,7 @@ public class SanPham_DAO {
         			+ "where MaSP=?");
         	stmt.setString(1, sp.getTenSanPham());
         	stmt.setString(2,sp.getLoaiSanPham());
-        	stmt.setString(3,sp.getNhaCungCap());
+        	stmt.setString(3,sp.getNhaCungCap().getMaNCC());
         	stmt.setDate(4, sp.getNgaySanXuat());
         	stmt.setDate(5,sp.getHanSuDung());
         	stmt.setInt(6, sp.getSoLuongKho());
@@ -95,13 +96,28 @@ public class SanPham_DAO {
         stmt.setString(1, sp.getMaSanPham());
         stmt.setString(2, sp.getTenSanPham());
         stmt.setString(3, sp.getLoaiSanPham());
-        stmt.setString(4, sp.getNhaCungCap());
+        stmt.setString(4, sp.getNhaCungCap().getMaNCC());
         stmt.setDate(5, sp.getNgaySanXuat());
         stmt.setDate(6, sp.getHanSuDung());
         stmt.setInt(7,sp.getSoLuongKho());
         stmt.setDouble(8, sp.getDonGia());
         n =stmt.executeUpdate();
 
+        return n>0;
+    }
+
+    public boolean delete(String masp){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n = 0;
+        try {
+            stmt = con.prepareStatement("delete from SanPham where MaSP = ?");
+            stmt.setString(1, masp);
+            n = stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return n>0;
     }
 

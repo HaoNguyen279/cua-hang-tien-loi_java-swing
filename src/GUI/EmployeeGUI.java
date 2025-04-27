@@ -32,12 +32,12 @@ import java.awt.event.MouseListener;
 import java.sql.Date;
 import java.text.DecimalFormat;
 
-import java.text.NumberFormat;
 import java.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /*
  * @description: Giao diện chính dành cho nhân viên của cửa hàng
@@ -53,18 +53,17 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             btnTheThanhVien, btnTamDungBan, btnKieuThanhToan, btnXemLaiHoaDon, btnKetCa, btnXuatHoaDon,btnTimTheoTenSanPham;
     private JTable tblSanPhamHoaDon, tblSanPhamKho;
     private DefaultTableModel dtmSanPhamHoaDon, dtmSanPhamKho;
+
     private ArrayList<SanPham> listSanPham;
     private Map<SanPham, Integer> listSanPhamHoaDon = new HashMap<SanPham, Integer>();
-
-    
-    
+    private Map<SanPham, Integer> listSanPhamHoaDonCu = new HashMap<SanPham, Integer>();
 	private KhachHang khThanhVien = new KhachHang(null);
+    private KhachHang khThanhVienCu = new KhachHang(null);
 	private NhanVien nhanvienbanhang;
-    
 
     private final String username;
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
-	private Map<SanPham, Integer> listSanPhamHoaDonCu = new HashMap<SanPham, Integer>();
+
 	private double tienKhachPre = 0;
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
 	private int phamTramGiam;
@@ -483,6 +482,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc3.fill = GridBagConstraints.BOTH;
         container.add(table2, gbc3);
 
+        reloadTongTienPanel();
         ConnectDB.getInstance().connect();
         loadData_sanPham();
 
@@ -584,7 +584,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             showLoginDialog(username);
         }
         else if(o == btnTheThanhVien){
-        	
         	Map.Entry<String, Integer> entry = nhapMaThanhVien().entrySet().iterator().next();
         	// map.entry là 1 interface đại diện cho 1 cặp giá trị key-value
         	 txtHangThanhVien.setText(entry.getKey());
@@ -592,57 +591,96 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         	updateSubTotal();
         }
         else if(o == btnKieuThanhToan){
-            choosePaymentMethod();
+            chonPhuongThucThanhToan();
         }
         else if(o == btnXuatHoaDon){
-        	String tt = txtTongThanhTien.getText().toLowerCase().replace("vnd", "").trim();
-        	tt = tt.replace(",", "");
+        	String tt = txtTongThanhTien.getText().toLowerCase().replace("vnd", "").replace(",","").trim();
         	double tongtien = Double.parseDouble(tt);
-        	double tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
+            double tienKhach = 0;
+            if(txtHinhThucThanhToan.getText().equalsIgnoreCase("Thanh toán bằng tiền mặt")){
+                tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
+                if(tienKhach>0) {
+                    //update số lượng sản phẩm
+                    SanPham_DAO sp_dao = new SanPham_DAO();
+                    for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+                        SanPham key = entry.getKey();
+                        Integer value = entry.getValue();
+                        key.setSoLuongKho(key.getSoLuongKho()-value);
+                        sp_dao.update(key);
+                    }
+                    //ghi hoa don len csdls
+                    nhanvienbanhang = new NhanVien(username);
+                    HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
+                    System.out.println(hd);
+                    HoaDon_DAO hd_dao = new HoaDon_DAO();
+                    hd_dao.create(hd);
+                    hd_dao.createCTHoaDon(hd);
+                    //tao hoa don
+                    new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim()), khThanhVien).hienThiHoaDon();
+                    listSanPhamHoaDonCu = listSanPhamHoaDon;
+                    tienKhachPre = tienKhach;
+                    phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
+                    //reset
+                    khThanhVien = new KhachHang(null);
+                    hd=null;
 
-        	if(tienKhach>0) {
-        		//update số lượng sản phẩm
-        		SanPham_DAO sp_dao = new SanPham_DAO();
-            	for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
-            	    SanPham key = entry.getKey();
-            	    Integer value = entry.getValue();
-            	    key.setSoLuongKho(key.getSoLuongKho()-value);
-            	    sp_dao.update(key);
-            	}
-            	//ghi hoa don len csdls
-            	nhanvienbanhang = new NhanVien(username);
-            	HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
-            	System.out.println(hd);
-            	HoaDon_DAO hd_dao = new HoaDon_DAO();
-            	hd_dao.create(hd);
-            	hd_dao.createCTHoaDon(hd);
-            	//tao hoa don 
-        		new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim())).hienThiHoaDon();
-        		listSanPhamHoaDonCu = listSanPhamHoaDon;
-        		tienKhachPre = tienKhach;
-        		phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
-            	//reset
-            	khThanhVien = new KhachHang(null);
-            	hd=null;
-            	
-            	listSanPhamHoaDon = new HashMap<SanPham, Integer>();
-            	for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
-            	    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
-            	        tblSanPhamHoaDon.setValueAt("", i, j); 
-            	    }
-            	}
-            	dtmSanPhamHoaDon.setRowCount(0);
-            	txtTongThanhTien.setText("");
-            	txtGiamGia.setText("");
-            	txtTongTien.setText("");
-            	loadData_sanPham();
-        	}
-        	else {
-        		JOptionPane.showMessageDialog(this, 
-                        "Đã hủy thanh toán!", 
-                        "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+                    for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+                        for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
+                            tblSanPhamHoaDon.setValueAt("", i, j);
+                        }
+                    }
+
+
+                    dtmSanPhamHoaDon.setRowCount(0);
+                    reloadTongTienPanel();
+                    loadData_sanPham();
                 }
-        	}
+                else {
+                    JOptionPane.showMessageDialog(this,
+                            "Đã hủy thanh toán!",
+                            "Thông báo", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            else {
+                tienKhach = Double.parseDouble(txtTongThanhTien.getText().replace("VND", "").replace(",","").trim());
+                //update số lượng sản phẩm
+                SanPham_DAO sp_dao = new SanPham_DAO();
+                for (Map.Entry<SanPham, Integer> entry : listSanPhamHoaDon.entrySet()) {
+                    SanPham key = entry.getKey();
+                    Integer value = entry.getValue();
+                    key.setSoLuongKho(key.getSoLuongKho()-value);
+                    sp_dao.update(key);
+                }
+                //ghi hoa don len csdls
+                nhanvienbanhang = new NhanVien(username);
+                HoaDon hd = new HoaDon( khThanhVien, nhanvienbanhang, listSanPhamHoaDon, Date.valueOf(LocalDate.now()));
+                System.out.println(hd);
+                HoaDon_DAO hd_dao = new HoaDon_DAO();
+                hd_dao.create(hd);
+                hd_dao.createCTHoaDon(hd);
+                //tao hoa don
+                new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim()), khThanhVien ).hienThiHoaDon();
+                listSanPhamHoaDonCu = listSanPhamHoaDon;
+                khThanhVienCu = new KhachHang(khThanhVien.getMaKhachHang(),khThanhVien.getTenKhachHang(),khThanhVien.getSoDienThoai(),khThanhVien.getHangThanhVien(),khThanhVien.getDiemThanhVien(),khThanhVien.getNgayDangKyTV());
+                tienKhachPre = tienKhach;
+                phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
+                //reset
+                khThanhVien = new KhachHang(null);
+                hd=null;
+
+                listSanPhamHoaDon = new HashMap<SanPham, Integer>();
+                for (int i = 0; i < tblSanPhamHoaDon.getRowCount(); i++) {
+                    for (int j = 0; j < tblSanPhamHoaDon.getColumnCount(); j++) {
+                        tblSanPhamHoaDon.setValueAt("", i, j);
+                    }
+                }
+                dtmSanPhamHoaDon.setRowCount(0);
+                reloadTongTienPanel();
+                loadData_sanPham();
+            }
+
+        }
         else if(o == btnKetCa){
             int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
             if(option == JOptionPane.YES_OPTION){
@@ -657,7 +695,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                         "Thông báo", JOptionPane.WARNING_MESSAGE);
                 }
         	else {
-            	new HoaDonDialog(listSanPhamHoaDonCu,tienKhachPre,phamTramGiam).hienThiHoaDon();
+            	new HoaDonDialog(listSanPhamHoaDonCu,tienKhachPre,phamTramGiam,khThanhVienCu).hienThiHoaDon();
             }
         }
     }  	
@@ -800,7 +838,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     /**
      * Description : Hiển thị 1 JDialog để nhân viên chọn phương thức thanh toán
      */
-    public void choosePaymentMethod(){
+    public void chonPhuongThucThanhToan(){
         JComboBox<String> cboPaymentMethod = new JComboBox<String>();
         String[] paymentMethods = {"Thanh toán bằng tiền mặt", "Thanh toán bằng ngân hàng","Thanh toán bằng MOMO", "Thanh toán bằng VISA", "Thanh toán bằng Apple Pay"};
         for(String pm : paymentMethods){
@@ -832,7 +870,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         );
         JDialog dialog = optionPane.createDialog("Chọn hình thức thanh toán");
         btnOk.addActionListener(e -> {
-        	String method = cboPaymentMethod.getSelectedItem().toString();
+        	String method = Objects.requireNonNull(cboPaymentMethod.getSelectedItem(),"Null object!").toString();
         	txtHinhThucThanhToan.setText(method);
         	dialog.dispose();
         });
@@ -846,7 +884,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     public Map<String,Integer> nhapMaThanhVien(){
     	Map<String, Integer> thanhVien = new HashMap<String, Integer>();
     	JTextField txtMaThanhVien = new JTextField(20);
-    	
+        txtMaThanhVien.setFont(fntMid);
+    	JLabel lblNhapMaKhachHang = new JLabel("Nhập mã khác hàng:");
+        lblNhapMaKhachHang.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblNhapMaKhachHang.setFont(fntMid);
         JButton btnOk = new JButton("Xác nhận");
        
         btnOk.setFont(fntMid);
@@ -855,6 +896,8 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnOk.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         Box pnlPaymentCustomPanel = Box.createVerticalBox();
+        pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
+        pnlPaymentCustomPanel.add(lblNhapMaKhachHang);
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
         pnlPaymentCustomPanel.add(txtMaThanhVien);
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));
@@ -872,18 +915,18 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         btnOk.addActionListener(e -> {
         	String makh = txtMaThanhVien.getText();
         	System.out.println(makh);
-        	khThanhVien = new KhachHang(makh);
+
         	KhachHang_DAO khdao = new KhachHang_DAO();
-        	KhachHang kh = khdao.getKhachHang(makh);
-        	
-        	if(kh.getMaKhachHang() !=null) {
-        		JOptionPane.showMessageDialog(this, " tìm thấy khác hàng!");
-        		int phanTramGiam = switch (kh.getHangThanhVien()) {
+        	khThanhVien = khdao.getKhachHang(makh);
+
+        	if(khThanhVien.getMaKhachHang() !=null) {
+        		JOptionPane.showMessageDialog(this, "Tìm thấy khác hàng!");
+        		int phanTramGiam = switch (khThanhVien.getHangThanhVien()) {
                     case "Kim Cương" -> 10;
                     case "Vàng" -> 5;
                     default -> 0;
                 };
-                thanhVien.put(kh.getHangThanhVien(), phanTramGiam);
+                thanhVien.put(khThanhVien.getHangThanhVien(), phanTramGiam);
         	}else {
         		JOptionPane.showMessageDialog(this, "Không tìm thấy khác hàng!");
         	}
@@ -917,13 +960,23 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         Object[] data = null;
         dtmSanPhamKho.setRowCount(0); // Reset toan bo table
         for (SanPham sp : listSpTimDuoc){
-            data = new Object[]{sp.getMaSanPham(), sp.getTenSanPham(), sp.getLoaiSanPham(), sp.getDonGia(), sp.getSoLuongKho()};
+            data = new Object[]{sp.getMaSanPham(), sp.getTenSanPham(), sp.getLoaiSanPham(), sp.getDonGia(), sp.getSoLuongKho() == 0 ? "Hết hàng": sp.getSoLuongKho() };
             dtmSanPhamKho.addRow(data);
         }
         for (SanPham sp : listSpConLai){
-            data = new Object[]{sp.getMaSanPham(), sp.getTenSanPham(), sp.getLoaiSanPham(), sp.getDonGia(), sp.getSoLuongKho()};
+            data = new Object[]{sp.getMaSanPham(), sp.getTenSanPham(), sp.getLoaiSanPham(), sp.getDonGia(), sp.getSoLuongKho() == 0 ? "Hết hàng": sp.getSoLuongKho() };
             dtmSanPhamKho.addRow(data);
         }
+        tblSanPhamKho.scrollRectToVisible(tblSanPhamKho.getCellRect(0, 0, true));
+    }
+
+    private void reloadTongTienPanel(){
+        txtHangThanhVien.setText("Không");
+        txtPhanTramGiam.setText("0%");
+        txtHinhThucThanhToan.setText("Thanh toán bằng tiền mặt");
+        txtTongTien.setText("0 VND");
+        txtGiamGia.setText("0 VND");
+        txtTongThanhTien.setText("0 VND");
     }
 
     @Override

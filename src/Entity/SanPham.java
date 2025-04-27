@@ -8,13 +8,13 @@ public class SanPham {
 	private String maSanPham;
 	private String tenSanPham;
 	private String loaiSanPham;
-	private String nhaCungCap;
+	private NhaCungCap nhaCungCap;
 	private Date ngaySanXuat;
 	private Date hanSuDung;
 	private int soLuongKho;
 	private double donGia;
 
-	public SanPham(String maSanPham, String tenSanPham, String loaiSanPham, String nhaCungCap, Date ngaySx, Date hanSd, int soLuongKho, double donGia) {
+	public SanPham(String maSanPham, String tenSanPham, String loaiSanPham, NhaCungCap nhaCungCap, Date ngaySx, Date hanSd, int soLuongKho, double donGia) {
 		this.maSanPham = maSanPham;
 		this.tenSanPham = tenSanPham;
 		this.loaiSanPham = loaiSanPham;
@@ -70,7 +70,7 @@ public class SanPham {
 		return loaiSanPham;
 	}
 
-	public String getNhaCungCap() {
+	public NhaCungCap getNhaCungCap() {
 		return nhaCungCap;
 	}
 
@@ -102,7 +102,7 @@ public class SanPham {
 		this.loaiSanPham = loaiSanPham;
 	}
 
-	public void setNhaCungCap(String nhaCungCap) {
+	public void setNhaCungCap(NhaCungCap nhaCungCap) {
 		this.nhaCungCap = nhaCungCap;
 	}
 
@@ -121,7 +121,7 @@ public class SanPham {
 	public void setDonGia(double donGia) {
 		this.donGia = donGia;
 	}
-	
+
 
 
 	@Override

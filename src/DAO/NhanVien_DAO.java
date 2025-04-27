@@ -1,5 +1,5 @@
 /*
- * @ (#) NhanVien_Dao.java   1.0     4/21/2025
+ * @ (#) NhanVien_DAO.java   1.0     4/21/2025
  * Copyright (c) 2025 IUH, All rights reserved.
  */
 
@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import ConnectDB.ConnectDB;
 
 /*
- * @description:
- * @author:
+ * @description: Data Access Object (DAO) của entity Nhân Viên
+ * @author: Huỳnh Gia Mân
  * @date:  4/21/2025
  * @version:    1.0
  */
@@ -62,7 +62,7 @@ public class NhanVien_DAO {
             ConnectDB.getInstance();
             Connection con = ConnectDB.getConnection();
             
-            String sql = "SELECT * FROM NhanVien where MaNhanVien = ?";
+            String sql = "SELECT * FROM NhanVien where MaNV = ?";
             PreparedStatement statement = null;
             statement = con.prepareStatement(sql);
             statement.setString(1, manv);
@@ -87,7 +87,7 @@ public class NhanVien_DAO {
         PreparedStatement stmt = null;
         int n =0 ;
         try {
-        	stmt = con.prepareStatement("update NhanVien set TenNhanVien=?,NgaySinh=?,NgayVaoLam=?,ChucVu=? where MaNhanVien=?");
+        	stmt = con.prepareStatement("update NhanVien set TenNV=?,NgaySinh=?,NgayVaoLam=?,ChucVu=? where MaNV=?");
         	stmt.setString(1, nv.getTenNhanVien());
         	stmt.setDate(2,nv.getNgaySinh());
         	stmt.setDate(3, nv.getNgayVaoLam());
@@ -101,22 +101,19 @@ public class NhanVien_DAO {
         return n>0;	
     }
 
-    public boolean create(NhanVien nv){
+    public boolean create(NhanVien nv) throws SQLException{
         ConnectDB.getInstance();
         Connection con = ConnectDB.getConnection();
         PreparedStatement stmt = null;
         int n = 0;
-        try {
-			stmt = con.prepareStatement("insert into" +" NhanVien values(?,?,?,?,?)");
-			stmt.setString(1, nv.getMaNhanVien());
-			stmt.setString(2, nv.getTenNhanVien());
-			stmt.setDate(3, nv.getNgaySinh());
-			stmt.setDate(4, nv.getNgayVaoLam());
-			stmt.setString(5, nv.getChucVu());
-			n =stmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+        stmt = con.prepareStatement("insert into" +" NhanVien values(?,?,?,?,?)");
+        stmt.setString(1, nv.getMaNhanVien());
+        stmt.setString(2, nv.getTenNhanVien());
+        stmt.setDate(3, nv.getNgaySinh());
+        stmt.setDate(4, nv.getNgayVaoLam());
+        stmt.setString(5, nv.getChucVu());
+        n =stmt.executeUpdate();
+
         return n>0;
 	}
     
@@ -130,7 +127,7 @@ public class NhanVien_DAO {
 	    	ConnectDB.getInstance().connect();
 			TaiKhoan_DAO dao = new TaiKhoan_DAO();
 			dao.delete(manv);
-			stmt = con.prepareStatement("delete from NhanVien where MaNhanVien = ?");
+			stmt = con.prepareStatement("delete from NhanVien where MaNV = ?");
 			stmt.setString(1, manv);
 			n = stmt.executeUpdate();
 		} catch (SQLException e) {
@@ -138,13 +135,4 @@ public class NhanVien_DAO {
 		}
 	    return n>0;
 	}
-    	
-    
-    
-    
-    
-
-    
-
-
 }

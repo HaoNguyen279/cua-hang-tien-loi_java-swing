@@ -157,7 +157,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 			
 			for(TaiKhoan tk : tklist) {
 				if(tk.getUsername().equals(user)&&tk.getPassword().equals(pwd)) {
-					if(tk.getRole().equals("nv")) {
+					if(tk.getRole().equals("nhanvien")) {
 						loginFrame.dispose();
 						//lay ten nhan vien
 						

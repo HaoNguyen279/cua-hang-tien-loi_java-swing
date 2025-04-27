@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import DAO.HoaDon_DAO;
+import Entity.KhachHang;
 import Entity.SanPham;
 
 import java.awt.*;
@@ -29,7 +30,7 @@ import java.util.Date;
 import java.util.Map;
 
 public class HoaDonDialog extends JDialog {
-    private String maHoaDon, maKhachHang, tenKhachHang, hangThanhVien;
+    private String maHoaDon;
     private Double thanhTien, giamGia,tongThanhTien, khachDua, tienThua;
     private JTable tblSanPham;
     private DefaultTableModel modelSanPham;
@@ -39,15 +40,15 @@ public class HoaDonDialog extends JDialog {
     private final DecimalFormat moneyFormat = new DecimalFormat("#,### VND");
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 15);
 
-    public HoaDonDialog(Map<SanPham, Integer> listsp,Double khach,int giamgia) {
-        khoiTaoThanhPhan(listsp,khach,giamgia);
+    public HoaDonDialog(Map<SanPham, Integer> listsp,Double khach,int giamgia,KhachHang khachHang) {
+        khoiTaoThanhPhan(listsp,khach,giamgia,khachHang);
        
         setSize(600, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
-    private void khoiTaoThanhPhan(Map<SanPham, Integer> listsp,Double Khach, int giamgia) {
+    private void khoiTaoThanhPhan(Map<SanPham, Integer> listsp, Double Khach, int giamgia, KhachHang khachHang) {
         setLayout(new BorderLayout(10, 10));
         
         // Panel chứa thông tin công ty
@@ -84,11 +85,11 @@ public class HoaDonDialog extends JDialog {
         pnlNgayMaHoaDon.add(lblNgayInHoaDon);
 
         // Mã khách hàng, tên khách hàng, hạng thành viên
-        lblMaKhachHang = new JLabel("Mã KH: "+ maKhachHang);
+        lblMaKhachHang = new JLabel("Mã KH: "+ khachHang.getMaKhachHang());
         lblMaKhachHang.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
-        lblTenKhachHang = new JLabel("Tên KH: "+ tenKhachHang);
+        lblTenKhachHang = new JLabel("Tên KH: "+ khachHang.getTenKhachHang());
         lblTenKhachHang.setBorder(BorderFactory.createEmptyBorder(0,0,0,20));
-        lblHangThanhVien = new JLabel("Hạng: " + hangThanhVien);
+        lblHangThanhVien = new JLabel("Hạng: " + khachHang.getHangThanhVien());
 
         JPanel pnlKhachHangInfo = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlKhachHangInfo.add(lblMaKhachHang);
@@ -191,15 +192,12 @@ public class HoaDonDialog extends JDialog {
     	    String[] rowdata = { key.getMaSanPham(), key.getTenSanPham(), Integer.toString(value), Double.toString(key.getDonGia())};
     	    modelSanPham.addRow(rowdata);
     	}
-
-    	
-    	
     }
         
 
     private void tinhTongTien(Double khach, int giamgia) {
         double tongCong = 0;
-        DecimalFormat df = new DecimalFormat("#,### VND");
+        DecimalFormat df = new DecimalFormat("#,###");
         
         for (int i = 0; i < modelSanPham.getRowCount(); i++) {	
             Object soLuongObj = modelSanPham.getValueAt(i, 2);
@@ -209,27 +207,25 @@ public class HoaDonDialog extends JDialog {
                 try {
                     // Chỉ xóa dấu phẩy trong chuỗi số
                     double soLuong = Double.parseDouble(soLuongObj.toString().replace(",", ""));
-                    
                     // Chỉ xóa dấu phẩy trong chuỗi số, giữ lại dấu chấm thập phân
                     double donGia = Double.parseDouble(donGiaObj.toString().replace(",", ""));
-                    
                     double thanhTien = soLuong * donGia;
-                    
                     modelSanPham.setValueAt(df.format(thanhTien), i, 4);
                     tongCong += thanhTien;
                 } catch (NumberFormatException ex) {
                     // Xử lý khi có lỗi chuyển đổi số
+                    ex.printStackTrace();
                 }
             }
         }
-        giamGia = tongCong*giamgia/100.0; 
+        giamGia = tongCong * giamgia/100.0;
         // Cập nhật các trường tổng tiền
         txtGiamGia.setText(Integer.toString(giamgia)+"%");
-        txtTongCong.setText(df.format(tongCong));
-        txtTongSauGiamGia.setText(df.format(tongCong - giamGia));
-        txtKhachDua.setText(df.format(khach));
+        txtTongCong.setText(moneyFormat.format(tongCong));
+        txtTongSauGiamGia.setText(moneyFormat.format(tongCong - giamGia));
+        txtKhachDua.setText(moneyFormat.format(khach));
         tienThua = khach - (tongCong-giamGia);
-        txtTienThua.setText(df.format(tienThua));
+        txtTienThua.setText(moneyFormat.format(tienThua));
     }
     public void hienThiHoaDon() {
         setVisible(true);

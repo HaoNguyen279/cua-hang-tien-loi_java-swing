@@ -1,3 +1,8 @@
+/*
+ * @ (#) TaiKhoan_DAO.java   1.0     4/23/2025
+ * Copyright (c) 2025 IUH, All rights reserved.
+ */
+
 package DAO;
 
 import java.sql.*;
@@ -5,6 +10,13 @@ import java.util.ArrayList;
 
 import ConnectDB.ConnectDB;
 import Entity.TaiKhoan;
+
+/*
+ * @description: Data Access Object (DAO) của entity Tài Khoản
+ * @author: Huỳnh Gia Mân
+ * @date:  4/23/2025
+ * @version:    1.0
+ */
 
 public class TaiKhoan_DAO {
 	ArrayList<TaiKhoan> dstk;
@@ -60,21 +72,54 @@ public class TaiKhoan_DAO {
         }
         return tk;
     }
-    
+
+    public boolean create(TaiKhoan tk) throws SQLException{
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n = 0;
+        stmt = con.prepareStatement("insert into" +" TaiKhoan values(?,?,?)");
+        stmt.setString(1,tk.getUsername());
+        stmt.setString(2, tk.getPassword());
+        stmt.setString(3, tk.getRole());
+        n =stmt.executeUpdate();
+        return n>0;
+    }
+
+    public boolean update(TaiKhoan tk){
+        ConnectDB.getInstance();
+        Connection con = ConnectDB.getConnection();
+        PreparedStatement stmt = null;
+        int n =0 ;
+        try {
+            stmt = con.prepareStatement("update TaiKhoan set password=?,role=? "
+                    + "where username=?");
+
+            stmt.setString(1, tk.getPassword());
+            stmt.setString(2, tk.getRole());
+            stmt.setString(3,tk.getUsername());
+            n = stmt.executeUpdate();
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return n>0;
+    }
+
     public boolean delete(String username){
         ConnectDB.getInstance();
         Connection con = ConnectDB.getConnection();
         PreparedStatement stmt = null;
         int n = 0;
         try {
-			stmt = con.prepareStatement("delete from TaiKhoan where username = ?");
-			stmt.setString(1, username);
-			n = stmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+            stmt = con.prepareStatement("delete from TaiKhoan where username = ?");
+            stmt.setString(1, username);
+            n = stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return n>0;
-	}
+    }
 
 
 	
