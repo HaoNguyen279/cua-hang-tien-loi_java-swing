@@ -11,11 +11,7 @@ import Entity.KhachHang;
 import Entity.NhaCungCap;
 import Entity.SanPham;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,7 +64,7 @@ public class SanPham_DAO {
         PreparedStatement stmt = null;
         int n =0 ;
         try {
-        	stmt = con.prepareStatement("update SanPham set TenSP=?,LoaiSP=?,NhaCC=? ,NgaySX=?,HanSD=?,SoLuongKho=?,DonGia=? "
+        	stmt = con.prepareStatement("update SanPham set TenSP=?,LoaiSP=?,MaNCC=? ,NgaySX=?,HanSD=?,SoLuongKho=?,DonGia=? "
         			+ "where MaSP=?");
         	stmt.setString(1, sp.getTenSanPham());
         	stmt.setString(2,sp.getLoaiSanPham());
@@ -120,6 +116,4 @@ public class SanPham_DAO {
         }
         return n>0;
     }
-
-
 }

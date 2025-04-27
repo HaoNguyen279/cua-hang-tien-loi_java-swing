@@ -40,7 +40,7 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
 
 
     private JPanel pnlSanPham, pnlNhanVien;
-    private JButton btnXoaNhanVien, btnThemSanPham,
+    private JButton btnXoaNhanVien, btnThemSanPham,btnXemDoanhThu,btnThoat,
             btnSuaSanPham, btnXoaSanPham, btnSuaTTNhanVien, btnTaoTKNhanVien,btnXoaTrang,btnThayDoiMK;
 
     private ArrayList<SanPham> listSp;
@@ -69,7 +69,8 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
         btnXoaNhanVien = new JButton("Xóa nhân viên");
         btnXoaTrang = new JButton("Xóa trắng");
         btnThayDoiMK = new JButton("Thay đổi mật khẩu");
-
+        btnXemDoanhThu = new JButton("Xem doanh thu");
+        btnThoat = new JButton("Thoát");
 
 
         JPanel mainPanel = new JPanel();
@@ -151,9 +152,9 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
                 return false; // can only edit on column 3
             }
         };
-
-        JScrollPane scrollSanPham = new JScrollPane();
-        scrollSanPham.setViewportView(tableSanPham = new JTable(tableModelSanPham));
+        tableSanPham = new JTable(tableModelSanPham);
+        tableSanPham.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// chỉnh single selection mode
+        JScrollPane scrollSanPham = new JScrollPane(tableSanPham);
         tableSanPham.setRowHeight(30);
         bSp5.add(scrollSanPham);
 
@@ -208,8 +209,9 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
                 return false; // can only edit on column 3
             }
         };
-        JScrollPane scrollNhanVien = new JScrollPane();
-        scrollNhanVien.setViewportView(tableNhanVien = new JTable(tableModelNhanVien));
+        tableNhanVien = new JTable(tableModelNhanVien);
+        tableNhanVien.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// chỉnh single selection mode
+        JScrollPane scrollNhanVien = new JScrollPane(tableNhanVien);
         tableNhanVien.setRowHeight(30);
         bNv3.add(scrollNhanVien);
 
@@ -222,17 +224,19 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
         leftPanel.add(pnlSanPham);
         leftPanel.add(pnlNhanVien);
 
-        JPanel rightPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel rightPanel = new JPanel(new GridLayout(5, 2, 10, 10));
         rightPanel.setOpaque(false);
 
-        rightPanel.add(btnThemSanPham);
-        rightPanel.add(btnSuaSanPham);
-        rightPanel.add(btnXoaSanPham);
-        rightPanel.add(btnTaoTKNhanVien);
-        rightPanel.add(btnSuaTTNhanVien);
-        rightPanel.add(btnXoaNhanVien);
-        rightPanel.add(btnXoaTrang);
-        rightPanel.add(btnThayDoiMK);
+        rightPanel.add(taoButtonPanel(btnThemSanPham));
+        rightPanel.add(taoButtonPanel(btnSuaSanPham));
+        rightPanel.add(taoButtonPanel(btnXoaSanPham));
+        rightPanel.add(taoButtonPanel(btnTaoTKNhanVien));
+        rightPanel.add(taoButtonPanel(btnSuaTTNhanVien));
+        rightPanel.add(taoButtonPanel(btnXoaNhanVien));
+        rightPanel.add(taoButtonPanel(btnXoaTrang));
+        rightPanel.add(taoButtonPanel(btnThayDoiMK));
+        rightPanel.add(taoButtonPanel(btnXemDoanhThu));
+        rightPanel.add(taoButtonPanel(btnThoat));
 
         mainPanel.add(leftPanel, BorderLayout.CENTER);
         mainPanel.add(rightPanel, BorderLayout.EAST);
@@ -247,6 +251,8 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
         btnTaoTKNhanVien.addActionListener(this);
         btnXoaTrang.addActionListener(this);
         btnThayDoiMK.addActionListener(this);
+        btnXemDoanhThu.addActionListener(this);
+        btnThoat.addActionListener(this);
 
 
         tableSanPham.addMouseListener(this);
@@ -481,12 +487,26 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
                             "Cập nhật thất bại",
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
-
-
             }catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Hãy chọn nhân viên ",
                         "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        else  if(o == btnXemDoanhThu){
+            HoaDon_DAO hd_dao = new HoaDon_DAO();
+            ArrayList<ThongKeDoanhThu> listTK = new ArrayList<ThongKeDoanhThu>();
+
+            listTK = hd_dao.getThongKe();
+            System.out.println(listTK);
+            new DoanhThuDialog(this,listTK);
+            System.out.println("haha");
+        }
+        else if (o == btnThoat){
+            int choice =  JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn thoát chứ!");
+            if(choice == JOptionPane.YES_OPTION){
+                this.dispose();
+                new LoginGUI();
             }
         }
     }
@@ -909,6 +929,20 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
         // All validations passed
         return true;
     }
+    private void setFixedSize(JButton button,int width, int height) { // su dung gridbaglayout ko có tác dụng set size
+        // nên tạo function set size cho button
+        Dimension size = new Dimension(width, height);
+        button.setPreferredSize(size);
+        button.setMaximumSize(size);
+        button.setMinimumSize(size);
+    }
+    private JPanel taoButtonPanel(JButton button) {
+        JPanel pnlBtn = new JPanel(new GridBagLayout());
+        pnlBtn.setOpaque(false);  // xóa background của panel
+        setFixedSize(button, 140, 80);
+        pnlBtn.add(button);
+        return pnlBtn;
+    }
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -930,3 +964,4 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
 
     }
 }
+

@@ -82,6 +82,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         };
 
         tblSanPhamHoaDon = new JTable(dtmSanPhamHoaDon);
+        tblSanPhamHoaDon.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// chỉnh single selection mode
         tblSanPhamHoaDon.setRowHeight(30);
         tblSanPhamHoaDon.setFont(fntMid);
         tblSanPhamHoaDon.getTableHeader().setFont(fntMid);
@@ -158,6 +159,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             }
         };
         tblSanPhamKho = new JTable(dtmSanPhamKho);
+        tblSanPhamKho.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);// chỉnh single selection mode
         tblSanPhamKho.setRowHeight(25);
         tblSanPhamKho.setFont(fntMid);
         tblSanPhamKho.getTableHeader().setFont(fntMid);
@@ -369,8 +371,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         pnlThanhTienDuoiJTbaleSp.add(boxThanhTien,BorderLayout.EAST);
         pnlThanhTienDuoiJTbaleSp.add(boxThanhVien,BorderLayout.WEST);
         
-        JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
 
+      JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
+      scrollPane.setMinimumSize(new Dimension(500, tblSanPhamHoaDon.getRowHeight() * 10));
+      scrollPane.setPreferredSize(new Dimension(500, tblSanPhamHoaDon.getRowHeight() * 15));
 
         table.add(scrollPane,BorderLayout.CENTER);
         table.add(pnlThanhTienDuoiJTbaleSp, BorderLayout.SOUTH);
@@ -379,7 +383,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         ////  PNL     TREN  PHAI
 
 
-        JPanel table1 = new JPanel(new GridLayout(1,1)); // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
+        JPanel table1 = new JPanel(new GridLayout(1,1));
+        // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
+        table.setBorder(BorderFactory.createTitledBorder("Hóa đơn"));
         table1.setBackground(Color.YELLOW);
 
         Box boxButtonRightTop = Box.createVerticalBox();
@@ -419,30 +425,35 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         Box boxButton = Box.createVerticalBox();
 
         boxButton.add(btnThemSanPham);
-        boxButton.add(Box.createVerticalStrut(30));
+        boxButton.add(Box.createVerticalStrut(15));
         boxButton.add(btnTimSanPham);
-        boxButton.add(Box.createVerticalStrut(30));
+        boxButton.add(Box.createVerticalStrut(15));
         boxButton.add(btnXoaSanPham);
-        boxButton.add(Box.createVerticalStrut(30));
+        boxButton.add(Box.createVerticalStrut(15));
         boxButton.add(btnTimTheoTenSanPham);
 
         boxButton.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
 
         JPanel pnlJtableSpKhoContainer = new JPanel(new BorderLayout());
 
-        JScrollPane scrollPane2 = new JScrollPane(tblSanPhamKho);
-        scrollPane2.setPreferredSize(new Dimension(500, tblSanPhamKho.getRowHeight() * 4 ));
+      JScrollPane scrollPane2 = new JScrollPane(tblSanPhamKho);
+//// Đặt chiều cao cố định nhỏ hơn cho bảng kho sản phẩm
+//      scrollPane2.setPreferredSize(new Dimension(500, tblSanPhamKho.getRowHeight() * 5));
+//// Thêm giới hạn kích thước tối đa
+//      scrollPane2.setMaximumSize(new Dimension(Integer.MAX_VALUE, tblSanPhamKho.getRowHeight() * 6));
 
         pnlJtableSpKhoContainer.add(scrollPane2,BorderLayout.CENTER);
 
-        JPanel pnlContainerOfTxtMaSanPham = new JPanel();
-
+        JPanel pnlContainerOfTxtMaSanPham = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        pnlContainerOfTxtMaSanPham.setBackground(new Color(223, 220, 213));
         pnlContainerOfTxtMaSanPham.setBorder(BorderFactory.createEmptyBorder(0,0, 10,0));
         pnlContainerOfTxtMaSanPham.add(lblMaSanPham);
         pnlContainerOfTxtMaSanPham.add(txtMaSanPham);
 
+        table2.setBorder(BorderFactory.createTitledBorder("Sản phẩm kho"));
+        table2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 250));
         table2.add(pnlContainerOfTxtMaSanPham, BorderLayout.NORTH);
-        table2.add(pnlJtableSpKhoContainer, BorderLayout.CENTER); // test69 là center
+        table2.add(pnlJtableSpKhoContainer, BorderLayout.CENTER);
         table2.add(boxButton, BorderLayout.EAST);
 
 
@@ -456,7 +467,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc1.gridheight = 2; // container chiem 2 dong (row)
         gbc1.weightx = 4.0; // default value se la 1,
         // weight x/y - muc do ma component co the mo rong khi resize frame
-        gbc1.weighty = 2.0; //
+        gbc1.weighty = 4.0; //
         gbc1.fill = GridBagConstraints.BOTH;
         container.add(table, gbc1);
 
@@ -467,7 +478,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc2.gridwidth = 1;
         gbc2.gridheight = 3;
         gbc2.weightx = 1.0;
-        gbc2.weighty = 3.0;
+        gbc2.weighty = 5.0;
         gbc2.fill = GridBagConstraints.BOTH;
         container.add(table1, gbc2);
 
@@ -888,6 +899,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     	JLabel lblNhapMaKhachHang = new JLabel("Nhập mã khác hàng:");
         lblNhapMaKhachHang.setAlignmentX(Component.LEFT_ALIGNMENT);
         lblNhapMaKhachHang.setFont(fntMid);
+
+        JPanel pnlLblNhapMaKhachHangContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        pnlLblNhapMaKhachHangContainer.add(lblNhapMaKhachHang);
         JButton btnOk = new JButton("Xác nhận");
        
         btnOk.setFont(fntMid);
@@ -897,7 +911,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
         Box pnlPaymentCustomPanel = Box.createVerticalBox();
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
-        pnlPaymentCustomPanel.add(lblNhapMaKhachHang);
+        pnlPaymentCustomPanel.add(pnlLblNhapMaKhachHangContainer);
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(10));
         pnlPaymentCustomPanel.add(txtMaThanhVien);
         pnlPaymentCustomPanel.add(Box.createVerticalStrut(50));

@@ -56,7 +56,7 @@ public class HoaDonDialog extends JDialog {
         pnlThongTinCongTy.setLayout(new BoxLayout(pnlThongTinCongTy, BoxLayout.Y_AXIS));
 
         // Khởi tạo JLabel
-        lblTenCongTy = new JLabel("Cửa Hàng Tiện Lợi SYBAI");
+        lblTenCongTy = new JLabel("Cửa Hàng Tiện Lợi Shiba");
         lblTenCongTy.setFont(new Font("Arial", Font.BOLD, 16));
         lblTenCongTy.setAlignmentX(Component.CENTER_ALIGNMENT);
 

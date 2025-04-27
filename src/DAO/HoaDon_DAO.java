@@ -7,22 +7,13 @@ package DAO;
 
 
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import ConnectDB.ConnectDB;
-import Entity.HoaDon;
-import Entity.KhachHang;
-import Entity.NhanVien;
-import Entity.SanPham;
-import Entity.TaiKhoan;
+import Entity.*;
 
 /*
  * @description: Data Access Object (DAO) của entity Hóa Đơn
@@ -174,6 +165,27 @@ public class HoaDon_DAO {
 			e.printStackTrace();
 		}
 		return n>0;
+	}
+	public ArrayList<ThongKeDoanhThu> getThongKe() {
+		ArrayList<ThongKeDoanhThu> thongke = new ArrayList<ThongKeDoanhThu>();
+		try {
+			ConnectDB.getInstance();
+			Connection con = ConnectDB.getConnection();
+			CallableStatement cstmt = con.prepareCall("{ call proc_ThongKeDoanhThuTheoNgay }");
+			ResultSet rs = cstmt.executeQuery();
+			if (rs.next()) {
+				Date ngay = rs.getDate(1);
+				int soLuongHD = rs.getInt(2);
+				int soLuongSP = rs.getInt(3);
+				double tongTien = rs.getDouble(4);
+				ThongKeDoanhThu thongke1 = new ThongKeDoanhThu(ngay, soLuongHD, soLuongSP, tongTien);
+				thongke.add(thongke1);
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return thongke;
 	}
 }
 		
