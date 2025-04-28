@@ -1,3 +1,8 @@
+/*
+ * @ (#) DangNhapGUI.java   1.0     4/21/2025
+ * Copyright (c) 2025 IUH, All rights reserved.
+ */
+
 package GUI;
 
 import ConnectDB.ConnectDB;
@@ -9,22 +14,18 @@ import Entity.TaiKhoan;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.*;
 
-public class LoginGUI extends JFrame implements ActionListener {
+public class DangNhapGUI extends JFrame implements ActionListener {
 	private JLabel lblUsername, lblPassword, lblTitleLogin;
-	private JTextField txtUsername, txtPassword;
-	private JButton btnLogin, btnExit;
+	private JTextField txtUsername;
+	private JPasswordField txtPassword;
+	private JButton btnLogin;
 	private ImageIcon backgroundIcon = new ImageIcon("image/gradientBgLogin.png");
-	private ImageIcon bg2 = new ImageIcon("image/femboi.png");
-	static String url = "image/gradientBgLogin.png";
-	static File file = new File(url);
 	private JFrame loginFrame;
-	private String name;
-	public LoginGUI() {
+	public DangNhapGUI() {
 		createLoginWindow();
 	}
 
@@ -42,7 +43,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 		txtUsername = new JTextField(20);
 		txtUsername.setBorder(BorderFactory.createMatteBorder(0,0,2,0, Color.BLACK));
 		txtUsername.setFont(new Font("Roboto", Font.PLAIN, 16));
-		txtPassword = new JTextField(20);
+		txtPassword = new JPasswordField(20);
 		txtPassword.setBorder(BorderFactory.createMatteBorder(0,0,2,0,Color.BLACK));
 		txtPassword.setFont(new Font("Roboto", Font.PLAIN, 16));
 
@@ -88,7 +89,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 		pnlRight.add(test4);
 		pnlRight.add(test6);
 		ConnectDB.getInstance().connect();
-		//
+
 		btnLogin.addActionListener(this);
 		loginFrame.setLayout(new GridLayout(1,2));
 		loginFrame.add(pnlLeftPanel);
@@ -100,8 +101,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 	}
 
 		public static void main(String[] args) {
-		new LoginGUI();
-		System.out.println("Tim thay file" + file.getAbsoluteFile());
+		new DangNhapGUI();
 	}
 	class LeftSubPanel extends JPanel{
 		public LeftSubPanel(){
@@ -116,7 +116,7 @@ public class LoginGUI extends JFrame implements ActionListener {
 			Font fntSubTitle = new Font("Roboto", Font.BOLD, 25);
 
 			JLabel lblSubTitle = new JLabel("CỬA HÀNG TIỆN LỢI");
-			JLabel lblMainTitle = new JLabel("FEMBOIZ");
+			JLabel lblMainTitle = new JLabel("SHIBA");
 
 			lblMainTitle.setForeground(Color.BLACK);
 			lblMainTitle.setFont(fntMainTitle);
@@ -162,12 +162,12 @@ public class LoginGUI extends JFrame implements ActionListener {
 						//lay ten nhan vien
 						
 						NhanVien nv = nv_dao.getNhanVien(user);
-						new EmployeeGUI(user,nv.getTenNhanVien());
+						new NhanVienGUI(user,nv.getTenNhanVien());
 						return;
 					}
 					else {
 						loginFrame.dispose();
-						new ManagementApp();
+						new QuanLyGUI();
 						return;
 					}
 				}

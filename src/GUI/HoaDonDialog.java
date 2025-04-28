@@ -1,5 +1,5 @@
 /*
- * @ (#) HoaDonPanel.java   1.0     4/24/2025
+ * @ (#) HoaDonDialog.java   1.0     4/24/2025
  * Copyright (c) 2025 IUH, All rights reserved.
  */
 
@@ -105,7 +105,7 @@ public class HoaDonDialog extends JDialog {
         pnlThongTinCongTy.add(lblTieuDeHoaDon);
         pnlThongTinCongTy.add(Box.createVerticalStrut(5));
 
-        // Panel header ------------------------------
+        // Panel header
         JPanel pnlHeader = new JPanel(new BorderLayout());
         pnlHeader.add(pnlThongTinCongTy, BorderLayout.CENTER);
 
@@ -183,6 +183,10 @@ public class HoaDonDialog extends JDialog {
         tinhTongTien(Khach,giamgia);
     }
 
+    /**
+     * Description : Phương thức thêm dữ liệu vào JTable hóa đơn
+     * @param listsp
+     */
     private void themDuLieuMau(Map<SanPham, Integer> listsp) {
         // Thêm dữ liệu mẫu vào bảng
     	for (Map.Entry<SanPham, Integer> entry : listsp.entrySet()) {
@@ -193,8 +197,12 @@ public class HoaDonDialog extends JDialog {
     	    modelSanPham.addRow(rowdata);
     	}
     }
-        
 
+    /**
+     * Description : Phương thức tính tổng tiền
+     * @param khach
+     * @param giamgia
+     */
     private void tinhTongTien(Double khach, int giamgia) {
         double tongCong = 0;
         DecimalFormat df = new DecimalFormat("#,###");
@@ -227,9 +235,12 @@ public class HoaDonDialog extends JDialog {
         tienThua = khach - (tongCong-giamGia);
         txtTienThua.setText(moneyFormat.format(tienThua));
     }
+
+    /**
+     * Description : Phương thức hiển thị hóa đơn
+     */
     public void hienThiHoaDon() {
         setVisible(true);
     }
 
-    
 }

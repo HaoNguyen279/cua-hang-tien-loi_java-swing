@@ -1,3 +1,8 @@
+/*
+ * @ (#) TinhTienDialog.java   1.0     4/27/2025
+ * Copyright (c) 2025 IUH, All rights reserved.
+ */
+
 package GUI;
 import javax.swing.*;
 import java.awt.*;
@@ -6,7 +11,7 @@ import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class PaymentInputDialog {
+public class TinhTienDialog {
     private JDialog dialog;
     private JTextField amountField;
     private double enteredAmount = 0.0;
@@ -186,41 +191,5 @@ public class PaymentInputDialog {
         long intAmount = (long) amount;
         String formattedAmount = String.format("%,d", intAmount).replace(",", ".");
         amountField.setText(formattedAmount);
-    }
-    
-    // Ví dụ sử dụng
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JFrame testFrame = new JFrame("Test");
-                testFrame.setSize(300, 200);
-                testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                testFrame.setLayout(new FlowLayout());
-                
-                JButton testButton = new JButton("Hiển thị bàn phím thanh toán");
-                testButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        PaymentInputDialog dialog = new PaymentInputDialog();
-                        double result = dialog.showPaymentKeypad(testFrame, 127500);
-                        
-                        if (result >= 0) {
-                            JOptionPane.showMessageDialog(testFrame, 
-                                "Khách đưa: " + String.format("%,.0f", result) + " VND\n" +
-                                "Tiền thừa: " + String.format("%,.0f", result - 127500) + " VND",
-                                "Kết quả", JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(testFrame, 
-                                "Đã hủy thanh toán!", 
-                                "Thông báo", JOptionPane.WARNING_MESSAGE);
-                        }
-                    }
-                });
-                
-                testFrame.add(testButton);
-                testFrame.setVisible(true);
-            }
-        });
     }
 }

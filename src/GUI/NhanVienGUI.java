@@ -1,5 +1,5 @@
 /*
- * @ (#) EmployeeGUI.java   1.0     4/21/2025
+ * @ (#) NhanVienGUI.java   1.0     4/21/2025
  * Copyright (c) 2025 IUH, All rights reserved.
  */
 
@@ -45,7 +45,7 @@ import java.util.Objects;
  * @date:  4/21/2025
  * @version:    1.0
  */
-public class EmployeeGUI extends JFrame implements ActionListener , MouseListener {
+public class NhanVienGUI extends JFrame implements ActionListener , MouseListener {
     private JLabel lblTenNhanVien, lblMaNhanVien, lblMaSanPham, lblHangThanhVien, lblPhanTramGiam,lblHinhThucThanhToan,
     lblTongTien,lblGiamGia,lblTongThanhTien;
     private JTextField  txtMaSanPham,txtTongTien, txtGiamGia,txtTongThanhTien, txtHangThanhVien, txtPhanTramGiam, txtHinhThucThanhToan;
@@ -68,7 +68,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     // Final là một biến mà giá trị của nó không thể thay đổi sau khi được gán lần đầu.
 	private int phamTramGiam;
 
-  public EmployeeGUI(String username, String name){
+  public NhanVienGUI(String username, String name){
         super("Quản lí bán hàng");
         this.username = username;
 
@@ -97,7 +97,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         // DefaultCellEditor là 1 class dùng để xử lý chỉnh sửa data cell của JTable
         // (DefaultCellEditor) ép kiểu (casting) do getDefaultEditor của JTable return TableCellEditor
 
-        editor.addCellEditorListener(new CellEditorListener() { // Lắng nghe sự kiện tại các cell của table
+        editor.addCellEditorListener(new CellEditorListener() { // Lắng nghe sự kiện tại các cell của pnlSpHoaDonTongTien
             @Override
             public void editingStopped(ChangeEvent e) {
                 int row = tblSanPhamHoaDon.getSelectedRow();
@@ -170,7 +170,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         lblMaNhanVien.setFont(fntMid);
         lblTenNhanVien.setFont(fntMid);
 
-        lblMaSanPham = new JLabel("Nhập mã sản phẩm");
+        lblMaSanPham = new JLabel("Nhập mã hoặc tên sản phẩm :");
         lblMaSanPham.setFont(fntMid);
 
         // JLabel phía bên trái
@@ -331,7 +331,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         container.setLayout(new GridBagLayout());
 
         // Khởi tạo JPanel chứa Jtable sản phẩm hóa đơn, tổng tiền
-        JPanel table = new JPanel(new BorderLayout());
+        JPanel pnlSpHoaDonTongTien = new JPanel(new BorderLayout());
 
         JPanel pnlThanhTienDuoiJTbaleSp = new JPanel(new BorderLayout());
 
@@ -367,26 +367,20 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxThanhVien.add(pnlLeftRow2);
         boxThanhVien.add(pnlLeftRow3);
 
-
         pnlThanhTienDuoiJTbaleSp.add(boxThanhTien,BorderLayout.EAST);
         pnlThanhTienDuoiJTbaleSp.add(boxThanhVien,BorderLayout.WEST);
-        
 
       JScrollPane scrollPane = new JScrollPane(tblSanPhamHoaDon);
       scrollPane.setMinimumSize(new Dimension(500, tblSanPhamHoaDon.getRowHeight() * 10));
       scrollPane.setPreferredSize(new Dimension(500, tblSanPhamHoaDon.getRowHeight() * 15));
-
-        table.add(scrollPane,BorderLayout.CENTER);
-        table.add(pnlThanhTienDuoiJTbaleSp, BorderLayout.SOUTH);
-
-
-        ////  PNL     TREN  PHAI
+      pnlSpHoaDonTongTien.setBorder(BorderFactory.createTitledBorder("Hóa đơn"));
+      pnlSpHoaDonTongTien.add(scrollPane,BorderLayout.CENTER);
+      pnlSpHoaDonTongTien.add(pnlThanhTienDuoiJTbaleSp, BorderLayout.SOUTH);
 
 
-        JPanel table1 = new JPanel(new GridLayout(1,1));
+        // Panel chứa full các button chức năng
+        JPanel pnlButtons = new JPanel(new GridLayout(1,1));
         // Vì maximum size của button sẽ ko có tác dụng với FlowLayout
-        table.setBorder(BorderFactory.createTitledBorder("Hóa đơn"));
-        table1.setBackground(Color.YELLOW);
 
         Box boxButtonRightTop = Box.createVerticalBox();
 
@@ -405,22 +399,19 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         JPanel pnlUserInfo = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pnlUserInfo.add(lblMaNhanVien);
         pnlUserInfo.add(lblTenNhanVien);
-
         boxButtonRightTop.setBorder(BorderFactory.createEmptyBorder(30,0,30,0));
-
         JPanel pnlWrapper = new JPanel();
         JPanel pnlTemp = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pnlTemp.add(boxButtonRightTop);
         pnlWrapper.add(pnlTemp);
-//        pnlWrapper.add(pnlUserInfo, BorderLayout.SOUTH);
-        table1.add(pnlWrapper);
-//        table1.add(pnlUserInfo);
+        pnlButtons.add(pnlWrapper);
 
 
-        ////  PNL     DUOI       TRAI ------------------------------------------
 
-        JPanel table2 = new JPanel(new BorderLayout());
-        table2.setBackground(new Color(223, 220, 213));
+        // Panel chứa Table sản phẩm kho và button thêm xóa sửa tìm Sản phẩm
+
+        JPanel pnlSanPhamHoaDonVaButtons = new JPanel(new BorderLayout());
+        pnlSanPhamHoaDonVaButtons.setBackground(new Color(223, 220, 213));
 
         Box boxButton = Box.createVerticalBox();
 
@@ -431,17 +422,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         boxButton.add(btnXoaSanPham);
         boxButton.add(Box.createVerticalStrut(15));
         boxButton.add(btnTimTheoTenSanPham);
-
         boxButton.setBorder(BorderFactory.createEmptyBorder(30,30,30,30));
 
         JPanel pnlJtableSpKhoContainer = new JPanel(new BorderLayout());
-
-      JScrollPane scrollPane2 = new JScrollPane(tblSanPhamKho);
-//// Đặt chiều cao cố định nhỏ hơn cho bảng kho sản phẩm
-//      scrollPane2.setPreferredSize(new Dimension(500, tblSanPhamKho.getRowHeight() * 5));
-//// Thêm giới hạn kích thước tối đa
-//      scrollPane2.setMaximumSize(new Dimension(Integer.MAX_VALUE, tblSanPhamKho.getRowHeight() * 6));
-
+        JScrollPane scrollPane2 = new JScrollPane(tblSanPhamKho);
         pnlJtableSpKhoContainer.add(scrollPane2,BorderLayout.CENTER);
 
         JPanel pnlContainerOfTxtMaSanPham = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -450,16 +434,14 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         pnlContainerOfTxtMaSanPham.add(lblMaSanPham);
         pnlContainerOfTxtMaSanPham.add(txtMaSanPham);
 
-        table2.setBorder(BorderFactory.createTitledBorder("Sản phẩm kho"));
-        table2.setMaximumSize(new Dimension(Integer.MAX_VALUE, 250));
-        table2.add(pnlContainerOfTxtMaSanPham, BorderLayout.NORTH);
-        table2.add(pnlJtableSpKhoContainer, BorderLayout.CENTER);
-        table2.add(boxButton, BorderLayout.EAST);
+        pnlSanPhamHoaDonVaButtons.setBorder(BorderFactory.createTitledBorder("Sản phẩm kho"));
+        pnlSanPhamHoaDonVaButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, 250));
+        pnlSanPhamHoaDonVaButtons.add(pnlContainerOfTxtMaSanPham, BorderLayout.NORTH);
+        pnlSanPhamHoaDonVaButtons.add(pnlJtableSpKhoContainer, BorderLayout.CENTER);
+        pnlSanPhamHoaDonVaButtons.add(boxButton, BorderLayout.EAST);
 
 
-
-
-        // Panel xanh lá (3x2)
+        // Panel (4x2)
         GridBagConstraints gbc1 = new GridBagConstraints();
         gbc1.gridx = 0;
         gbc1.gridy = 0;
@@ -469,9 +451,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         // weight x/y - muc do ma component co the mo rong khi resize frame
         gbc1.weighty = 4.0; //
         gbc1.fill = GridBagConstraints.BOTH;
-        container.add(table, gbc1);
+        container.add(pnlSpHoaDonTongTien, gbc1);
 
-        // Panel vàng (1x3)
+        // Panel (1x3)
         GridBagConstraints gbc2 = new GridBagConstraints();
         gbc2.gridx = 4;
         gbc2.gridy = 0;
@@ -480,9 +462,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc2.weightx = 1.0;
         gbc2.weighty = 5.0;
         gbc2.fill = GridBagConstraints.BOTH;
-        container.add(table1, gbc2);
+        container.add(pnlButtons, gbc2);
 
-        // Panel đỏ (3x1)
+        // Panel (4x1)
         GridBagConstraints gbc3 = new GridBagConstraints();
         gbc3.gridx = 0;
         gbc3.gridy = 2;
@@ -491,7 +473,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         gbc3.weightx = 4.0;
         gbc3.weighty = 1.0;
         gbc3.fill = GridBagConstraints.BOTH;
-        container.add(table2, gbc3);
+        container.add(pnlSanPhamHoaDonVaButtons, gbc3);
 
         reloadTongTienPanel();
         ConnectDB.getInstance().connect();
@@ -505,12 +487,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
 
     }
 
-    public static void main(String[] args) {
-        new EmployeeGUI(null,null);
-    }
+
 
     /**
-     *
+     * description : Phương thức Override actionPerformed - xử lí sự kiện nhấn các Button
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -609,7 +589,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         	double tongtien = Double.parseDouble(tt);
             double tienKhach = 0;
             if(txtHinhThucThanhToan.getText().equalsIgnoreCase("Thanh toán bằng tiền mặt")){
-                tienKhach = new PaymentInputDialog().showPaymentKeypad(this,tongtien);
+                tienKhach = new TinhTienDialog().showPaymentKeypad(this,tongtien);
                 if(tienKhach>0) {
                     //update số lượng sản phẩm
                     SanPham_DAO sp_dao = new SanPham_DAO();
@@ -630,6 +610,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                     new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim()), khThanhVien).hienThiHoaDon();
                     listSanPhamHoaDonCu = listSanPhamHoaDon;
                     tienKhachPre = tienKhach;
+                    khThanhVienCu = khThanhVien;
                     phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
                     //reset
                     khThanhVien = new KhachHang(null);
@@ -641,7 +622,6 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                             tblSanPhamHoaDon.setValueAt("", i, j);
                         }
                     }
-
 
                     dtmSanPhamHoaDon.setRowCount(0);
                     reloadTongTienPanel();
@@ -673,7 +653,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
                 //tao hoa don
                 new HoaDonDialog(listSanPhamHoaDon,tienKhach,Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim()), khThanhVien ).hienThiHoaDon();
                 listSanPhamHoaDonCu = listSanPhamHoaDon;
-                khThanhVienCu = new KhachHang(khThanhVien.getMaKhachHang(),khThanhVien.getTenKhachHang(),khThanhVien.getSoDienThoai(),khThanhVien.getHangThanhVien(),khThanhVien.getDiemThanhVien(),khThanhVien.getNgayDangKyTV());
+                khThanhVienCu = khThanhVien;
                 tienKhachPre = tienKhach;
                 phamTramGiam = Integer.parseInt(txtPhanTramGiam.getText().replace("%", "").trim());
                 //reset
@@ -696,7 +676,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
             int option = JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn kết thúc ca chứ?");
             if(option == JOptionPane.YES_OPTION){
                 this.dispose();
-                new LoginGUI();
+                new DangNhapGUI();
             }
         }
         else if(o == btnXemLaiHoaDon) {
@@ -712,7 +692,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }  	
 
     /**
-     * Description : Cập nhật lại các Sản phẩm trong ArrayList hóa đơn tạm
+     * Description : Phương thức cập nhật lại các Sản phẩm trong ArrayList hóa đơn tạm
      * @param rowSelected
      */
     private void updateHoaDon(int rowSelected) {
@@ -734,7 +714,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     /**
-     * Description : Cập nhật giá trị của các JTextField thành tiền, giảm giá và tổng thành tiền
+     * Description : Phương thức cập nhật giá trị của các JTextField thành tiền, giảm giá và tổng thành tiền
      */
     private void updateSubTotal(){
         Double total = 0.0;
@@ -753,7 +733,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     /**
-     * Description : Chỉnh lại fixed size (size cố định cho JButton truyền vào function)
+     * Description : Phương thức chỉnh  fixed size (size cố định cho JButton truyền vào function)
      * @param button JButton, width int, height int
      */
     private void setFixedSize(JButton button,int width, int height) { // su dung gridbaglayout ko có tác dụng set size
@@ -765,7 +745,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     /**
-     * Description : Cập nhật list các sản phầm từ Database lên JTable chứa sản phẩm kho
+     * Description : Phương thức cập nhật list các sản phầm từ Database lên JTable chứa sản phẩm kho
      */
     public void loadData_sanPham(){
     	dtmSanPhamKho.setRowCount(0); // reset table
@@ -784,13 +764,13 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     /**
-     * Description : Hiển thị 1 JDialog ngăn user tương tác với cửa sổ khác, trừ khi login chính xác account hiện tại
+     * Description : Phương thức hiển thị 1 JDialog ngăn user tương tác với cửa sổ khác, trừ khi login chính xác account hiện tại
      * @param username
      */
     public void showLoginDialog(String username) {
         // custom lai layout cho dialog
         JTextField usernameField = new JTextField(10);
-        JTextField passwordField = new JTextField(10);
+        JPasswordField passwordField = new JPasswordField(10);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -847,7 +827,7 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
     }
 
     /**
-     * Description : Hiển thị 1 JDialog để nhân viên chọn phương thức thanh toán
+     * Description : Phương thức hiển thị 1 JDialog để nhân viên chọn phương thức thanh toán
      */
     public void chonPhuongThucThanhToan(){
         JComboBox<String> cboPaymentMethod = new JComboBox<String>();
@@ -950,6 +930,11 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         return thanhVien;
     }
 
+    /**
+     * Phương thức tìm tương đối sản phẩm theo mã và tên sản phẩm
+     * @param loaiTim boolean
+     */
+
     private void timSanPhamTheoMa(boolean loaiTim){ // true là tìm theo mã, false là tìm theo sản phẩm
         String keyword = txtMaSanPham.getText();
         ArrayList<SanPham> listSpTimDuoc = new ArrayList<>();
@@ -984,6 +969,9 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         tblSanPhamKho.scrollRectToVisible(tblSanPhamKho.getCellRect(0, 0, true));
     }
 
+    /**
+     * Description : Phương thức reset panel tổng tiền
+     */
     private void reloadTongTienPanel(){
         txtHangThanhVien.setText("Không");
         txtPhanTramGiam.setText("0%");
@@ -993,6 +981,10 @@ public class EmployeeGUI extends JFrame implements ActionListener , MouseListene
         txtTongThanhTien.setText("0 VND");
     }
 
+    /**
+     * Description : Phương thức Override mouseClicked - xử lí sự kiện click chuột trên JTable
+     * @param e the event to be processed
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
 

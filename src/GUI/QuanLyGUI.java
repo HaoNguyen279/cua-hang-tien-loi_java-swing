@@ -1,5 +1,5 @@
 /*
- * @ (#) EmployeeGUI.java   1.0     4/21/2025
+ * @ (#) QuanLyGUI.java   1.0     4/21/2025
  * Copyright (c) 2025 IUH, All rights reserved.
  */
 package GUI;
@@ -19,16 +19,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class ManagementApp extends JFrame implements ActionListener, MouseListener {
+public class QuanLyGUI extends JFrame implements ActionListener, MouseListener {
     private JTextField txtMaNV, txtTenNV, txtChucVu, txtNgaySinh,txtNgayVaoLam;
     private JTextField txtMaSP, txtTenSP, txtLoaiSP,
             txtNgaySX, txtHanSD, txtSoLuong, txtDonGia;
@@ -52,7 +48,7 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
 
     private final Font fntMid = new Font("Roboto", Font.PLAIN, 18);
     private static  String mk;
-    public ManagementApp() {
+    public QuanLyGUI() {
         pnlSanPham = new JPanel();
         pnlSanPham.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         pnlSanPham.setBackground(Color.LIGHT_GRAY);
@@ -506,7 +502,7 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
             int choice =  JOptionPane.showConfirmDialog(this,"Bạn có chắc muốn thoát chứ!");
             if(choice == JOptionPane.YES_OPTION){
                 this.dispose();
-                new LoginGUI();
+                new DangNhapGUI();
             }
         }
     }
@@ -619,13 +615,6 @@ public class ManagementApp extends JFrame implements ActionListener, MouseListen
                     "Dữ liệu nhập vào không hợp lệ!",
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new ManagementApp();
-        });
     }
 
     @Override
